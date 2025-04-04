@@ -1,0 +1,191 @@
+<apex:page controller="ConversationViewController" showHeader="true" sidebar="false" tabStyle="Inwise_Setup__tab" docType="html-5.0">
+   
+    <!--<apex:includeScript value="{!$Resource.ConversionForm}"/>-->
+    <apex:stylesheet value="{!URLFOR($Resource.ConversionForm, 'convForm-master/dist/jquery.convform.min.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.ConversionForm, 'convForm-master/dist/jquery.convform.css')}"/>
+
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" lang="en">
+        <head>
+            <meta charset="utf-8" />
+            <meta http-equiv="x-ua-compatible" content="ie=edge" />
+            <title>Contact Data </title> 
+            <meta name="viewport" content="width=device-width, initial-scale=1" /> 
+
+            <!-- <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js" />  -->
+            <apex:includeScript value="{!URLFOR($Resource.Jquery_Resources, 'Jquery_Resources/Ajjquery.min.js')}" /> 
+           
+            <script type='text/javascript'>
+
+                $(document).ready(function() {
+                    //alert('rtrt');
+                    initCall();
+                });
+
+                window.onload = function init() {
+                    //alert('onlll');
+                    function getMessages() {
+                        var element = document.getElementById('messages');
+                        element.scrollTop = element.scrollHeight;
+                    }
+                    setTimeout(getMessages, 500);
+                };
+
+                function scrollHeight() {
+                    function getMessages() {
+                        var element = document.getElementById('messages');
+                        element.scrollTop = element.scrollHeight;
+                    }
+                    setTimeout(getMessages, 500);
+                };
+                
+                function noenter(){ 
+                        
+                    if(window.event){                    
+                        var  key = window.event.keyCode;     //IE
+                    } 
+                
+                    if(key == 13) {  
+                        var txtVal = document.getElementById('{!$Component.form.theTextInput}').value;
+                        sendSMS(txtVal);
+                        return false;               
+                    } else{                    
+                        return true;               
+                    } 
+                };
+
+                function sendSMSOnSubmit(){
+                    var txtVal = document.getElementById('{!$Component.form.theTextInput}').value;
+                    sendSMS(txtVal);  
+                }
+            </script>
+        </head>
+
+        <apex:slds />
+        <body>
+            <apex:form id="form">
+                <!-- Include CSRF token as a hidden input field -->
+                <input type="hidden" name="csrfToken" value="{!csrfToken}" />
+
+                <apex:actionFunction name="initCall" action="{!init}" reRender="none">
+                    <apex:param name="csrfToken" value="{!csrfToken}" assignTo="{!csrfToken}" />
+                </apex:actionfunction>
+                <apex:actionFunction name="sendSMS" action="{!doSendSMS}" reRender="Chatbox"  oncomplete="scrollHeight();">
+                    <apex:param name="theTextInput"  value="" />
+                </apex:actionFunction>
+
+                <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large " aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <apex:commandbutton value="✖" action="{!myClosePopup}" styleClass="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" />
+                            <apex:sectionHeader title="" subtitle="Message History"  id="sectionheader1" ></apex:sectionHeader>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                            <table style="width:100%">
+                                <tr>
+                                    <th>
+                                        <div class="demo-only" style="width:100%;padding-bottom:300px">
+                                            <nav class="slds-nav-vertical slds-nav-vertical_compact" aria-label="Sub page">
+                                                <div class="slds-nav-vertical__section">
+                                                    <apex:commandbutton value="Refresh" action="{!selectedRecord}" styleClass="slds-button  slds-button--brand" rerender="Chatbox,Recentbox" oncomplete="scrollHeight();"/>
+                                            
+                                                    <h2 id="entity-header" class="slds-nav-vertical__title slds-is-active slds-border_bottom" style="padding-left: 0px">
+                                                        Recent {!recentHistoryCount}
+                                                    </h2>
+                                                    <ul aria-describedby="entity-header">
+                                                        <apex:outputPanel id="Recentbox">
+                                                            <apex:repeat value="{!messageWrapperList}" var="rec">
+                                                                <li class="slds-nav-vertical__item ">
+                                                                    <apex:outputText rendered="{!If(rec.unReadMessageCount== 0 ,true,false) }">
+                                                                        <apex:commandbutton value=" {!rec.parentName}" id="button" action="{!selectedRecord}" styleClass="slds-button slds-button_neutral slds-button_full-width  " rerender="Chatbox"   oncomplete="scrollHeight();">
+                                                                            <apex:param name="selectedId" value="{!rec.parentId}" assignTo="{!selectedId}" />
+                                                                            <apex:param name="recentSelected" value="true" assignTo="{!recentSelected}" /> 
+                                                                        </apex:commandbutton>
+                                                                    </apex:outputText>
+                                                                    <apex:outputText rendered="{!If(rec.unReadMessageCount> 0 ,true,false) }">
+                                                                        <apex:commandbutton value=" {!rec.parentName}({!rec.unReadMessageCount})" action="{!selectedRecord}" styleClass="slds-button slds-button_neutral slds-button_full-width  " rerender="Chatbox" style="color: blue;"  oncomplete="scrollHeight();">
+                                                                            <apex:param name="selectedId" value="{!rec.parentId}" assignTo="{!selectedId}" />
+                                                                            <apex:param name="recentSelected" value="true" assignTo="{!recentSelected}" /> 
+                                                                        </apex:commandbutton>
+                                                                    </apex:outputText>
+                                                                </li>
+                                                            </apex:repeat>
+                                                        </apex:outputPanel>
+                                                    </ul>
+                                                </div>
+                                            </nav>
+                                        </div>
+                                    </th>
+                                    <th style="width:1000px;" class="slds-table_bordered slds-table_col-bordered slds-border_bottom slds-border_left slds-border_right"> 
+                                        <!---chat section-->
+                                        <apex:outputPanel id="Chatbox">
+                                            <section id="demo">
+                                                <div class="vertical-align">
+                                                    <div class="container">
+                                                        <div class="row">
+                                                            <div class="col-sm-6 col-sm-offset-3 col-xs-offset-0">
+                                                                <div class="card no-border">
+                                                                    <div id="chat" class="conv-form-wrapper">
+                                                                        <div class="wrapper-messages" style="margin-bottom: 46px; max-height: 444px;white-space: initial;"  >
+                                                                            
+                                                                            <div id="messages" >
+                                                                                <apex:repeat value="{!ListofMessage}" var="rec">
+                                                                                    <apex:outputText rendered="{!If(rec.Direction__c =='Incoming' ,true,false) }" >
+                                                                                        <div class="message from">
+                                                                                            <apex:outputText rendered="{!If(rec.Read__c == true ,true,false) }">
+                                                                                                {!rec.Message__c}
+                                                                                                <div >
+                                                                                                    <span  title="{!rec.createdDate}" aria-label="Jan 13, 5:36 PM " style=" font-size: 9px;color: sienna;"> <apex:outputText value="{0,date,dd' 'MMM' 'yyyy 'at' h:mm z}"> <apex:param value="{!rec.createdDate}" /> </apex:outputText></span>
+                                                                                                </div>
+                                                                                                
+                                                                                            </apex:outputText>
+                                                                                            <apex:outputText rendered="{!If(rec.Read__c != true ,true,false) }">
+                                                                                                <b><i> <font color="black"> {!rec.Message__c} </font></i></b>
+                                                                                                <div >
+                                                                                                    <span  title="{!rec.createdDate}" aria-label="Jan 13, 5:36 PM " style=" font-size: 9px;color: sienna;"> <apex:outputText value="{0,date,dd' 'MMM' 'yyyy 'at' h:mm z}"> <apex:param value="{!rec.createdDate}" /> </apex:outputText></span>
+                                                                                                </div>
+                                                                                                
+                                                                                            </apex:outputText>
+                                                                                        </div>
+                                                                                    </apex:outputText>
+                                                                                    <apex:outputText rendered="{!If(rec.Direction__c =='Outgoing' ,true,false) }">
+                                                                                        
+                                                                                        <div class="message to ready">
+                                                                                            {!rec.Message__c}<br/>
+                                                                                            <div >
+                                                                                                <span  title="{!rec.createdDate}" aria-label="Jan 13, 5:36 PM " style=" font-size: 9px;color: sienna;">
+                                                                                                    <apex:outputText value="{0,date,dd' 'MMM' 'yyyy 'at' h:mm z}"> 
+                                                                                                        <apex:param value="{!rec.createdDate}" /> 
+                                                                                                    </apex:outputText>
+                                                                                                    
+                                                                                                </span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </apex:outputText>
+                                                                                </apex:repeat>
+                                                                            </div>
+                                                                        </div>
+                                                                        
+                                                                        <form class="convFormDynamic">
+                                                                            <apex:inputText value="{!messageBody}" id="theTextInput"  style="overflow: hidden; overflow-wrap: break-word; resize: horizontal; height: 32px;margin-left: 2px;    width: 930px;" styleClass="slds-input" html-placeholder="Send a message" onkeypress="return noenter()"/>
+                                                                            <apex:commandbutton value="▶" onClick="sendSMSOnSubmit();" styleClass="slds-button slds-button--brand" style="margin-left: 5px;"  oncomplete="scrollHeight();" rerender="Chatbox" id="submit"></apex:commandbutton>
+                                                                        </form> 
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        </apex:outputPanel> 
+                                        <!--- Closed chat section-->
+                                    </th> 
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </apex:form>
+        </body>
+    </html>   
+</apex:page>

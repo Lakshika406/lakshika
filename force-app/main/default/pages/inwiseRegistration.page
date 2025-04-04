@@ -1,0 +1,52 @@
+<apex:page standardController="Account__c" sidebar="true" id="page1" tabStyle="Inwise_Setup__tab"  docType="html-5.0" >
+    
+    <c:inwiseUtilHeader />
+  <script type="text/javascript">
+    // extensions="inwiseRegistrationController"
+    /*$(document).ready(function(){
+            var htmlElement =  '<div data-step="1" data-position="right"  id="inwiseStep1" style="width:240px;"> </div> ';
+            $($(".mainTitle")[0]).wrap(htmlElement);
+            $("#inwiseStep1").attr('data-intro','{!$Label.inwise__StartTour_inwiseSetup_1}');  
+        }); */
+  </script> 
+    <!--<div class="{!objinwiseLtngConstants.slds}">
+    <apex:form >          
+                <apex:pageBlock id="block1" title="Create a new account">
+                         <apex:pageBlockButtons location="bottom" id="blockButtons">
+                                <apex:commandButton value="Create account"  action="{!getStarted}" reRender="msg,block1"  rendered="{!NOT(isSuccsss)}" status="status2" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/>
+                                <apex:commandButton value="Cancel" action="{!cancel}" rendered="{!NOT(isSuccsss)}" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/>
+                                <apex:commandButton value="GoTo Home" action="{!gotoHome}" rendered="{!isSuccsss}" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"></apex:commandButton>
+                                <apex:actionStatus id="status2" startText="Please wait....">
+                                    <apex:facet name="start"><img  src="/img/loading.gif" /></apex:facet>
+                                    <apex:facet name="stop"></apex:facet>
+                              </apex:actionStatus>
+                </apex:pageBlockButtons>
+
+               <apex:pageBlockSection id="Section1" columns="2" >
+                    <apex:pageBlockSectionItem >
+                          <apex:outputPanel >
+                                <span data-step="3" data-intro="{!$Label.StartTour_inwiseSetup_3}">
+                                      <apex:outputLabel value="Email" />
+                                </span>      
+                           </apex:outputPanel>     
+                        <apex:inputText value="{!Email}" styleClass="{!objinwiseLtngConstants.sldsInput}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                         <apex:outputLabel value="Company name" />
+                         <apex:inputText value="{!companyName}" styleClass="{!objinwiseLtngConstants.sldsInput}"/>
+                    </apex:pageBlockSectionItem>
+                   <apex:pageBlockSectionItem >
+                     <apex:outputLabel value="Contact name" />
+                     <apex:inputText value="{!contactName}" styleClass="{!objinwiseLtngConstants.sldsInput}"/>
+                   </apex:pageBlockSectionItem>
+                   <apex:pageBlockSectionItem >
+                     <apex:outputLabel value="Phone" />
+                     <apex:inputText value="{!phone}" styleClass="{!objinwiseLtngConstants.sldsInput}"/>
+                   </apex:pageBlockSectionItem> 
+            </apex:pageBlockSection>
+          </apex:pageBlock>  
+    </apex:form>     
+    </div>
+      <c:TagManager />-->
+
+</apex:page>

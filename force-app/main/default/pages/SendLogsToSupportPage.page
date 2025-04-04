@@ -1,0 +1,25 @@
+<apex:page controller="inwiseGlobalAction" >
+    <script>
+        // Securely call Apex RemoteAction when the page loads
+        window.onload = function() {
+            // Confirm user intention
+            if (confirm("Are you sure you want to send mail?")) {
+                Visualforce.remoting.Manager.invokeAction(
+                    '{!$RemoteAction.inwiseGlobalAction.remoteSendLogsToSupport}', // Secure RemoteAction
+                    function(result, event) {
+                        if (event.status) {
+                            alert(result); // Show success or permission message
+                            window.history.back();
+                        } else {
+                            alert("Error occurred: " + event.message); // Handle errors
+                            window.history.back();
+                        }
+                    },
+                    { escape: true } // Escape any HTML/JS content returned from the server
+                );
+            } else {
+                window.history.back();
+            }
+        };
+    </script>
+</apex:page>

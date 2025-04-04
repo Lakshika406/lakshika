@@ -1,0 +1,196 @@
+<!--
+ - Created by Kapil Goutam on 12/7/2018.
+ --> 
+
+<apex:page id="inwiseAccountDetail" standardController="Campaign" extensions="CampaignDetailController"> 
+    <apex:form > 
+        <script src="{!$Resource.jquery}" type="text/javascript"></script>
+
+        <!-- Reference CSS files -->
+        <link rel="stylesheet" href="{!URLFOR($Resource.jqwidgets_resources, 'jqwidgets_resources/jqx.base.css')}" type="text/css" />
+        <link rel="stylesheet" href="{!URLFOR($Resource.jqwidgets_resources, 'jqwidgets_resources/jqx.energyblue.css')}" type="text/css" />
+        <link rel="stylesheet" href="{!URLFOR($Resource.jqwidgets_resources, 'jqwidgets_resources/jqx.arctic.css')}" type="text/css" />
+
+
+      
+        <!-- Reference JavaScript files -->
+        <script src="{!URLFOR($Resource.jqwidgets_resources, 'jqwidgets_resources/jqx-all.js')}" type="text/javascript"></script>
+        <script src="{!URLFOR($Resource.jqwidgets_resources, 'jqwidgets_resources/globalize.js')}" type="text/javascript"></script>
+        <!-- <script src="{!$Resource.jquerymin}" type="text/javascript"></script> -->
+        <script src="{!URLFOR($Resource.Jquery_Resources, 'Jquery_Resources/jquery.min.js')}" type="text/javascript"></script>
+        
+        <apex:outputPanel id="jspanel"> 
+        <script type="text/javascript">
+            function doOpeninEditModeJs(){
+                var moduleAutoSuggest = getModuleAutoSuggestOption();
+                console.log('==moduleAutoSuggest='+JSON.stringify(moduleAutoSuggest));
+                var dataAdapter = new $.jqx.dataAdapter(moduleAutoSuggest);
+                var parentPageUrl = document.referrer;
+                obj = '';
+                var accountIndex ='{!selectedAccountIndex}';
+                console.log('==accountIndex='+accountIndex);
+                $("#jqxcombobox").jqxComboBox({ theme: "arctic", source: dataAdapter._source, selectedIndex: accountIndex, width: '165px', height: '25px' });  
+
+                $('#jqxcombobox').bind('select', function (event) {
+                    var args = event.args; 
+                    console.log('==args='+args);
+                    if (args != undefined) {
+                        var item = event.args.item;
+                        if (item != null) {
+                            obj = item;
+                            console.log(obj);
+                            printSelectedValue(obj.originalItem.id, obj.originalItem.label);
+                        }
+                    }
+                }); 
+            }
+            function getModuleAutoSuggestOption() {
+                
+                var jsAccounts= new Array();
+                <apex:repeat value="{!listOfAccount}" var="accn">  
+                    
+                    jsAccounts.push({
+                        "id" : '{!JSENCODE(accn.Id)}',
+                        "label": '{!JSENCODE(accn.Name)}'
+                    });
+                </apex:repeat>  
+                return jsAccounts;
+            }   
+        </script>
+        </apex:outputPanel>
+        
+        <style type="text/css">
+            .custPopup{
+                background-color: white;
+                border-width: 2px;
+                border-style: solid;
+                z-index: 9999;
+                left: 50%;
+                padding:10px;
+                position: absolute;
+                /* These are the 3 css properties you will need to change so the popup
+                displays in the center of the screen. First set the width. Then set
+                margin-left to negative half of what the width is. You can add
+                the height property for a fixed size pop up if you want.*/
+                width: 500px;
+                margin-left: -250px;
+                top:100px;
+                border-color: rgb(227, 177, 79);
+            }
+            .popupBackground{
+                background-color:black;
+                opacity: 0.20;
+                filter: alpha(opacity = 20);
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                z-index: 9998;
+            }
+            .jqx-rc-all-arctic {
+                /* width: 62% !important; */
+            }
+           
+        </style>
+        <apex:pageMessages id="showmsg"></apex:pageMessages>
+        <apex:pageBlock id="block1">
+            <apex:actionFunction name="printSelectedValue" action="{!selectedAccId}" rerender="null" >
+                <apex:param name="selectedAccId" assignTo="{!selectedAccountId}" id="selectedAccId2" value=""  />  
+                <apex:param name="selectedAccName" assignTo="{!selectedAccount}" id="selectedAccName" value=""  /> 
+            </apex:actionFunction>  
+            <apex:pageBlockButtons location="top" id="BlockButtons">
+                <apex:commandButton value="Edit"  status="status" reRender="block1,showmsg,jspanel" action="{!doOpeninEditMode}" oncomplete="doOpeninEditModeJs()" rendered="{!NOT(isEditMode)}" ></apex:commandButton>
+                <apex:commandButton value="Save" action="{!doSave}" status="status" rendered="{!isEditMode}" reRender="block1,showmsg"></apex:commandButton>
+                <apex:commandButton value="Sync members to inwise" action="{!showPopup}" rerender="progressPopupp,pnlDetail,showmsg" status="status">
+                    <apex:param value="sendmember" id="p1" name="p1" assignTo="{!actionType}" />
+                </apex:commandButton>
+                <apex:commandButton value="Get members actions from inwise" action="{!showPopup}" rerender="progressPopupp,pnlDetail,showmsg" status="status">
+                    <apex:param value="InwiseMembersActions" id="p2" name="p2" assignTo="{!actionType}" />
+                </apex:commandButton> 
+              <!--  <apex:commandButton value="Get campaign statistics from inwise" action="{!showPopup}" rerender="progressPopupp,pnlDetail" status="status">
+                    <apex:param value="InwiseStatistics" id="p3" name="p3" assignTo="{!actionType}" />
+                </apex:commandButton>-->
+                <apex:commandButton value="Cancel" action="{!doCancel}" status="status" reRender="block1,showmsg"></apex:commandButton>
+            
+
+                <apex:actionStatus id="status" startText="Please wait....">
+                    <apex:facet name="start"><img  src="/img/loading.gif" /></apex:facet>
+                    <apex:facet name="stop"></apex:facet>
+                </apex:actionStatus>
+            </apex:pageBlockButtons>
+            <apex:outputPanel id="progressPopupp">
+                <apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!displayPopUp}"/>
+                <apex:outputPanel styleClass="custPopup" layout="block" rendered="{!displayPopUp}">
+                    {!Msg}<br/><br/><br/>
+                    <apex:commandButton value="Okay" action="{!closePopup}" rerender="progressPopupp"/>
+                </apex:outputPanel>
+            </apex:outputPanel> 
+            <apex:outputPanel id="pnlDetail">
+                <apex:pageBlockSection title="inwise campaign properties">
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Campaign.Fields.Account__c.Label}"></apex:outputLabel>
+                        <apex:outputPanel >
+                            <apex:outputLabel value="{!selectedAccount}" rendered="{!NOT(isEditMode)}" />
+                            <div id='jqxcombobox'/>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Campaign.Fields.Campaign_Type__c.Label}"></apex:outputLabel>
+                        <apex:outputPanel >
+                            <apex:outputLabel value="{!objCampaign.Campaign_Type__c}" rendered="{!NOT(isEditMode)}"/>
+                            <apex:inputField value="{!objCampaign.Campaign_Type__c}" rendered="{!isEditMode}"/>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Campaign.Fields.Sendid__c.Label}"></apex:outputLabel>
+                        <apex:outputPanel >
+                            <apex:outputLabel value="{!Sendid}" rendered="{!NOT(isEditMode)}" />
+                            <apex:inputField value="{!objCampaign.Sendid__c}" rendered="{!isEditMode}" />
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+                <apex:pageBlockSection title="Statistics of the campaign">
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Campaign.Fields.Opened__c.Label}"></apex:outputLabel>
+                        <apex:outputLabel value="{!Opened}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Campaign.Fields.Opens_Unique__c.Label}"></apex:outputLabel>
+                        <apex:outputLabel value="{!OpensUnique}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Campaign.Fields.Clicked__c.Label}"></apex:outputLabel>
+                        <apex:outputLabel value="{!Clicked}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Campaign.Fields.Clicks_Unique__c.Label}"></apex:outputLabel>
+                        <apex:outputLabel value="{!ClicksUnique}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Campaign.Fields.Nonsent__c.Label}"></apex:outputLabel>
+                        <apex:outputLabel value="{!Nonsent}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Campaign.Fields.Sent__c.Label}"></apex:outputLabel>
+                        <apex:outputLabel value="{!Sent}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Campaign.Fields.Unsubscribe__c.Label}"></apex:outputLabel>
+                        <apex:outputLabel value="{!Unsubscribe}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Campaign.Fields.Bounced__c.Label}"></apex:outputLabel>
+                        <apex:outputLabel value="{!Bounced}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Campaign.Fields.Groupid__c.Label}"></apex:outputLabel>
+                        <apex:outputLabel value="{!Groupid}" />
+                    </apex:pageBlockSectionItem>
+                
+                </apex:pageBlockSection>
+            </apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>
+    <c:TagManager />
+</apex:page>

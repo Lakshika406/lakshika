@@ -1,0 +1,53 @@
+<apex:page showHeader="true" sidebar="true" id="page1" tabStyle="Inwise_Setup__tab" controller="inwiseScheduleJobController" docType="html-5.0" >
+<c:inwiseUtilHeader />
+<!--
+ <script> 
+    <style type="text/css">
+        .slds .slds-input {
+              width: 80%;
+              padding-left: 0px;
+        }
+    </style>
+    </script>
+  -->  
+  <div class="{!objinwiseLtngConstants.slds}">  
+     <apex:form >  
+                 <apex:sectionHeader title="Schedule" subtitle="Sync"  id="sectionheader1" ></apex:sectionHeader>
+                 <apex:pageMessages id="msg"/>
+                <apex:pageBlock id="block1" title="{!sCurrentStepText}">
+                            <apex:pageBlockButtons location="bottom">
+                                    <apex:actionStatus id="stausloading"> 
+                                            <apex:facet name="stop">
+                                                    <apex:outputPanel >
+                                                                  <apex:commandButton value="Execute Now" action="{!doScheduleNow}" reRender="msg,block1" rendered="{!NOT(isSuccess)}" status="stausloading" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                                                                      <apex:commandButton value="Save & Schedule" action="{!doSchedule}" reRender="msg,block1" rendered="{!NOT(isSuccess)}" status="stausloading" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />     
+                                                            <apex:commandButton value="GoTo Sync List" action="{!gotoHome}" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"  ></apex:commandButton>
+                                                     </apex:outputPanel>       
+                                            </apex:facet>
+                                            <apex:facet name="start">
+                                                     <apex:outputPanel >   
+                                                            <apex:commandButton value="Processing..."  disabled="true" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                                                            <apex:commandButton value="Processing..."  disabled="true" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                                                            <apex:commandButton value="Processing..."  disabled="true" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                                                      </apex:outputPanel>      
+                                            </apex:facet>
+                                    </apex:actionStatus>
+                                    
+                            </apex:pageBlockButtons>
+                           <apex:pageBlockSection columns="1">
+                                <apex:outputField value="{!objSync.Name}" />
+                                <apex:outputField value="{!objSync.Group_Name__c}" />
+                                <apex:pageBlockSectionItem >
+                                        <apex:outputPanel >
+                                                      <apex:outputLabel value="{!$ObjectType.Sync__c.fields.Scheduled_Daily_At__c.Label}" />        
+                                         </apex:outputPanel>       
+                                        <apex:inputField value="{!objSync.Scheduled_Daily_At__c}" />
+                                </apex:pageBlockSectionItem>
+                          </apex:pageBlockSection>
+                          
+                </apex:pageBlock>  
+       </apex:form>
+      </div>
+          <c:TagManager />
+
+</apex:page>

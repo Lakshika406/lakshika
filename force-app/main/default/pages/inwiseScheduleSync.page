@@ -1,0 +1,314 @@
+<apex:page showHeader="true" sidebar="true" id="page1" tabStyle="Inwise_Setup__tab" standardController="Sync__c" extensions="inwiseScheduleSyncController,inwiseGlobalAction" docType="html-5.0" action="{!init}">
+<c:inwiseUtilHeader />
+  <link rel="stylesheet" href="{!URLFOR($Resource.Jquery_Resources, 'Jquery_Resources/jquery-ui.css')}" /> 
+  <!-- <link rel="stylesheet" href="/resources/demos/style.css" /> -->
+  <script src="{!URLFOR($Resource.Jquery_Resources, 'Jquery_Resources/jquery-1.12.4.js')}"></script> 
+  <script src="{!URLFOR($Resource.Jquery_Resources, 'Jquery_Resources/jquery-ui.js')}"></script> 
+<!--
+       <style type="text/css">
+        .slds .slds-input {
+              width: 80%;
+              padding-left: 0px;
+        }
+    </style>
+    -->
+   <div class="{!objinwiseLtngConstants.slds}">  
+      <apex:form >  
+          <script type="text/javascript">
+                /** related to auto complete**/
+                function split( val ) {
+                  return val.split( /,\s*/ );
+                }
+                function extractLast( term ) {
+                  return split( term ).pop();
+                }
+                function callRemoteAction(txtbox, fieldapiname, sobjectName) {
+                    Visualforce.remoting.Manager.invokeAction(
+                           '{!$RemoteAction.inwiseGlobalAction.getSelectedPicklistOptions}',
+                           fieldapiname,sobjectName,
+                           function(result, event){
+                              if (event.status) {
+                                  addAutoComplete(txtbox,result);
+                              }else if (event.type === 'exception') {
+                                  
+                              }else {
+                                  //alert(event.message);
+                              }
+                          }, 
+                          {escape: true}                                        
+                      );
+                }
+                function addAutoComplete(txtbox,availableTags) {
+                    $(txtbox).on( "keydown", function( event ) {
+                    if ( event.keyCode === $.ui.keyCode.TAB &&
+                          $( this ).autocomplete( "instance" ).menu.active ) {
+                          event.preventDefault();
+                      }
+                    })
+                    .autocomplete({
+                      minLength: 0,
+                      source: function( request, response ) {
+                        // delegate back to autocomplete, but extract the last term
+                        response( $.ui.autocomplete.filter(
+                        availableTags, extractLast( request.term ) ) );
+                      },
+                      focus: function() {
+                        // prevent value inserted on focus
+                        return false;
+                      },
+                      select: function( event, ui ) {
+                        var terms = split( this.value );
+                        // remove the current input
+                        terms.pop();
+                        // add the selected item
+                        terms.push( ui.item.value );
+                        // add placeholder to get the comma-and-space at the end
+                        terms.push( "" );
+                        this.value = terms.join( ", " );
+                        return false;
+                      }
+                    });
+                }
+                /** related to auto complete**/
+                var chklistOuter;
+                var typeVsOperator = '{!typeVsOperatorString}';
+                function CheckOperator(list, sobjectName) {
+                    chklistOuter = list;
+                    if($(list).val() != ""){
+                        var typeOfField = $(list).val().split(":")[1];
+                        var fieldapiname = $(list).val().split(":")[0];
+                        var data = jQuery.parseJSON(typeVsOperator);
+                        vals = data[typeOfField].split(",");
+                         var $secondChoice =  $(list).parent().parent().find('select.DependentOperator');
+                            $secondChoice.empty();
+                            $secondChoice.append("<option value=''>None</option>");
+                            $.each(vals, function(index, value) {
+                                $secondChoice.append("<option>" + value + "</option>");
+                          });
+                          //use js remoting to get the options
+                          //alert("typeOfField::-->>" + typeOfField + '>>>' + fieldapiname + '>>>' + sobjectName);
+                          if(typeOfField == "PICKLIST" || typeOfField == "MULTIPICKLIST"){
+                                if(sobjectName == "{!sCONSTLead}" || sobjectName == "{!sCONSTContact}"){
+                                    callRemoteAction($($(list).parent().next().next().children()[0]),fieldapiname,sobjectName);
+                                }
+                                    
+                          }
+                          
+                    }else{
+                            var $secondChoice =  $(list).parent().parent().find('select.DependentOperator');
+                            $secondChoice.empty();
+                            $secondChoice.append("<option value=''>None</option>");
+                    }
+                    
+              }
+              function onLoad(){
+                  $(".FIELDAPINAME").each(function(){
+                            var ctrl = $(this).parent().parent().find('select.DependentOperator'); 
+                            var selectedoperatorvalue = ctrl.val();
+                            CheckOperator(this, $(ctrl).attr('Class').split(' ')[1]);
+                            $(this).parent().parent().find('select.DependentOperator').val(selectedoperatorvalue);
+
+                    });
+              }
+          </script>
+          <style type="text/css">
+                .FIELDAPINAME{
+                    width: 280px;
+                }
+          </style>
+            <apex:actionFunction name="doAddRow" action="{!objSyncLead.doAddRow}" reRender="tblFilter,msg" status="statusloading" >
+          </apex:actionFunction>
+
+          <apex:actionFunction name="doDeleteRow" action="{!objSyncLead.doDeleteRow}" reRender="tblFilter" status="statusloading">
+                 <apex:param name="toDeleteRow"  assignTo="{!objSyncLead.toDeleteRow}" value="" />
+          </apex:actionFunction>
+
+          <apex:actionFunction name="doAddRowContact" action="{!objSyncContact.doAddRow}" reRender="tblFilterContact,msg" status="statusloading" >
+          </apex:actionFunction>
+
+          <apex:actionFunction name="doDeleteRowContact" action="{!objSyncContact.doDeleteRow}" reRender="tblFilterContact" status="statusloading">
+                 <apex:param name="toDeleteRow"  assignTo="{!objSyncContact.toDeleteRow}" value="" />
+          </apex:actionFunction>
+
+            <apex:sectionHeader title="Steps" subtitle="Sync SF to inwise"  id="sectionheader1"></apex:sectionHeader>
+              <apex:pageMessages id="msg"/>
+             <apex:pageBlock id="block1" title="{!objWrapperSync.currentStep}"> 
+                      <apex:pageBlockButtons location="bottom">
+                              <apex:commandButton value="Previous Step" action="{!doPrevStep}" rendered="{!objWrapperSync.Step2}" reRender="block1,msg" status="statusloading"  styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                              <apex:commandButton value="{!IF(objWrapperSync.Step2,'Save','Next Step')}" action="{!nextStep}" rendered="{!objWrapperSync.isCanProceed}" reRender="block1,msg" status="statusloading" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                              <apex:commandButton value="Cancel" action="{!doCancel}" immediate="true" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" /> 
+                               <apex:actionStatus id="statusloading">
+                                      <apex:facet name="start"><img src="/img/loading.gif" /></apex:facet>
+                               </apex:actionStatus>
+                    </apex:pageBlockButtons>
+
+                    <apex:pageBlockSection columns="1" rendered="{!AND(objWrapperSync.isCanProceed,objWrapperSync.Step1)}" >
+                        <apex:pageBlockSectionItem >
+                              <apex:outputLabel value="Sync Name"></apex:outputLabel>
+                               <apex:inputField value="{!objWrapperSync.objSync.Name}"  styleClass="{!objinwiseLtngConstants.sldsInput}" style="width: 30%"/> 
+                        </apex:pageBlockSectionItem>
+                         <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Select Account" />
+                            <apex:outputPanel >
+                                <apex:selectList size="1"  value="{!objWrapperSync.selectedAccount}" styleClass="{!objinwiseLtngConstants.sldsInput}" style="width: 30%">
+                                        <apex:actionSupport event="onchange" reRender="pnlGroups,msg" action="{!init}" status="statusloading"></apex:actionSupport>
+                                        <apex:selectOptions value="{!listOfSelectOptionAccounts}" />
+                                </apex:selectList>
+                            </apex:outputPanel>   
+                       </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Select or create inwise group" />
+                            <apex:outputPanel id="pnlGroups">
+                                <apex:selectList size="1"  value="{!objWrapperSync.selectedGroup}" styleClass="{!objinwiseLtngConstants.sldsInput}" style="width: 30%">
+                                        <apex:selectOptions value="{!listOfSelectOptionGroups}" />
+                                </apex:selectList>&nbsp;&nbsp;Or&nbsp;&nbsp;
+                                <apex:inputText value="{!strGroupName}" styleClass="slds-input" style="width: auto;" html-placeholder="Enter new Group Name" />    
+                            </apex:outputPanel>   
+                       </apex:pageBlockSectionItem>
+                       <!-- <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Create Group" />
+                            <apex:inputText value="{!strGroupName}" />
+                       </apex:pageBlockSectionItem>  -->
+                   </apex:pageBlockSection>    
+
+                     <apex:pageBlockSection columns="1" rendered="{!AND(objWrapperSync.isCanProceed,objWrapperSync.Step2)}">   
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Sync Name"></apex:outputLabel>
+                         <apex:outputField value="{!objWrapperSync.objSync.Name}"  /> 
+                  </apex:pageBlockSectionItem>
+                 <apex:pageBlockSectionItem >
+                      <apex:outputLabel value="Selected Group" />
+                      <apex:outputLabel value="{!objWrapperSync.selectedGroupName}" />
+                 </apex:pageBlockSectionItem> 
+                 <apex:pageBlockSectionItem >
+                          <apex:outputLabel value="Selected Object" />
+                          <apex:outputPanel >
+                               <span style="vertical-align: top;">Lead</span>&nbsp;
+                                <apex:inputCheckbox value="{!objWrapperSync.objSync.Leads__c}" >
+                                    <apex:actionSupport event="onclick" action="{!showSyncSection}" status="statusloading" reRender="pnlLead,msg"/>
+                                </apex:inputCheckbox>
+                                &nbsp;&nbsp;
+                                <span style="vertical-align: top;">Contact</span>&nbsp;
+                                <apex:inputCheckbox value="{!objWrapperSync.objSync.Contacts__c}" >
+                                    <apex:actionSupport event="onclick" action="{!showSyncSection}" status="statusloading" reRender="pnlLead,msg"/>
+                                </apex:inputCheckbox>
+                           </apex:outputPanel>
+                 </apex:pageBlockSectionItem>   
+              </apex:pageBlockSection>   
+              <apex:outputPanel id="pnlLead">
+                            <apex:pageBlockSection rendered="{!AND(objWrapperSync.isCanProceed,objWrapperSync.Step2,objWrapperSync.objSync.Leads__c)}" title="Filter Leads" columns="1">
+                                     <!-- LEAD SECTION START-->
+                                          <apex:pageBlockSection columns="1">
+                                              <apex:pageBlockTable value="{!objSyncLead.listOfSyncFilters}" var="l" id="tblFilter" width="70%" styleClass="{!JSENCODE(objinwiseLtngConstants.sldsTableSldsTableBorderedSldsTableStriped)}">
+                                                      <apex:column width="2%" style="vertical-align: top;">
+                                                              <apex:facet name="header">No</apex:facet>
+                                                              <apex:outputLabel value="{!l.rowno}" styleClass="ROWNO" />
+                                                      </apex:column>
+                                                      <apex:column width="20%" style="vertical-align: top;">
+                                                              <apex:facet name="header">Fields</apex:facet>
+                                                              <apex:selectList size="1" value="{!l.objSyncFilter.Field_Api_Name__c}" onchange="CheckOperator(this, '{!sCONSTLead}');" styleClass="FIELDAPINAME">
+                                                                      <apex:selectOptions value="{!objSyncLead.listOfSelectOptionFields_Lead}"/>
+                                                                </apex:selectList>
+                                                      </apex:column>
+                                                      <apex:column width="10%">
+                                                              <apex:facet name="header">Operator</apex:facet>
+                                                              <apex:selectList id="selectOperator" styleClass="DependentOperator {!sCONSTLead}" style="width: 130px;" value="{!l.objSyncFilter.Operator__c}" size="1">
+                                                                    <apex:selectOptions value="{!listOfSOOperator}" />
+                                                              </apex:selectList>
+                                                      </apex:column>
+                                                      <apex:column width="20%" style="vertical-align: top;">
+                                                              <apex:facet name="header">Fields Value</apex:facet>
+                                                              <apex:inputText value="{!l.objSyncFilter.Value__c}"  style="width:200px" />
+                                                      </apex:column>
+                                                      <apex:column width="48%" style="vertical-align: top;">
+                                                              <apex:facet name="header"></apex:facet>
+                                                               <apex:outputPanel >
+                                                                        <span style="font-weight: bold; vertical-align: top; margin-right: 8px;">{!l.sAndOr}</span>
+                                                                         <a href="javascript:void(0)" onclick="doAddRow();" style="margin-right: 5px;">
+                                                                                <apex:image value="{!URLFOR($Resource.inwiseResource,'/images/add.jpg')}"  style="width: 17px;height: 15px;"/>
+                                                                           </a>    
+                                                                            <apex:outputPanel rendered="{!objSyncLead.listOfSyncFilters.Size>1}">
+                                                                                <a href="javascript:void(0)" onclick="doDeleteRow('{!HTMLENCODE(TEXT(l.rowno))}');">
+                                                                                      <apex:image value="{!URLFOR($Resource.inwiseResource,'/images/removered.jpg')}" style="width: 17px;height: 15px;" />
+                                                                                </a>   
+                                                                             </apex:outputPanel> 
+                                                               </apex:outputPanel>
+                                                      </apex:column>
+                                              </apex:pageBlockTable>
+                                                  
+                                          </apex:pageBlockSection> 
+                                         
+
+                                    <!-- LEAD SECTION END-->
+                         </apex:pageBlockSection>
+
+                               <!-- CONTACT SECTION START-->
+                        <apex:pageBlockSection rendered="{!AND(objWrapperSync.isCanProceed,objWrapperSync.Step2,objWrapperSync.objSync.Contacts__c)}" title="Filter Contacts" columns="1">
+                              <apex:pageBlockSection columns="1">
+                                  <apex:pageBlockTable value="{!objSyncContact.listOfSyncFilters}" var="l" id="tblFilterContact" width="70%" styleClass="{!JSENCODE(objinwiseLtngConstants.sldsTableSldsTableBorderedSldsTableStriped)}">
+                                          <apex:column width="2%" style="vertical-align: top;">
+                                                  <apex:facet name="header">No</apex:facet>
+                                                  <apex:outputLabel value="{!l.rowno}" styleClass="ROWNO" />
+                                          </apex:column>
+                                          <apex:column width="20%" style="vertical-align: top;">
+                                                  <apex:facet name="header">Fields</apex:facet>
+                                                  <apex:selectList size="1" value="{!l.objSyncFilter.Field_Api_Name__c}" onchange="CheckOperator(this,'{!sCONSTContact}');" styleClass="FIELDAPINAME">
+                                                          <apex:selectOptions value="{!objSyncContact.listOfSelectOptionFields_Contact}"/>
+                                                    </apex:selectList>
+                                          </apex:column>
+                                          <apex:column width="10%">
+                                                  <apex:facet name="header">Operator</apex:facet>
+                                                  <apex:selectList id="selectOperator" styleClass="DependentOperator {!sCONSTContact}" style="width: 130px;" value="{!l.objSyncFilter.Operator__c}" size="1">
+                                                        <apex:selectOptions value="{!listOfSOOperator}" />
+                                                  </apex:selectList>
+                                          </apex:column>
+                                          <apex:column width="20%" style="vertical-align: top;">
+                                                  <apex:facet name="header">Fields Value</apex:facet>
+                                                  <apex:inputText value="{!l.objSyncFilter.Value__c}"  style="width:200px" />
+                                          </apex:column>
+                                          <apex:column width="48%" style="vertical-align: top;">
+                                                  <apex:facet name="header"></apex:facet>
+                                                   <apex:outputPanel >
+                                                            <span style="font-weight: bold; vertical-align: top; margin-right: 8px;">{!l.sAndOr}</span>
+                                                             <a href="javascript:void(0)" onclick="doAddRowContact();" style="margin-right: 5px;">
+                                                                    <apex:image value="{!URLFOR($Resource.inwiseResource,'/images/add.jpg')}"  style="width: 17px;height: 15px;"/>
+                                                               </a>    
+                                                                <apex:outputPanel rendered="{!objSyncContact.listOfSyncFilters.Size>1}">
+                                                                    <a href="javascript:void(0)" onclick="doDeleteRowContact('{!HTMLENCODE(TEXT(l.rowno))}');">
+                                                                          <apex:image value="{!URLFOR($Resource.inwiseResource,'/images/removered.jpg')}" style="width: 17px;height: 15px;" />
+                                                                    </a>   
+                                                                 </apex:outputPanel> 
+                                                   </apex:outputPanel>
+                                          </apex:column>
+                                  </apex:pageBlockTable>
+                              </apex:pageBlockSection> 
+                         </apex:pageBlockSection>
+                    <!-- LEAD SECTION END-->          
+              </apex:outputPanel>
+              <apex:pageBlockSection columns="1" rendered="{!AND(objWrapperSync.isCanProceed,objWrapperSync.Step2)}">
+                  <apex:outputPanel >
+                      <apex:inputCheckbox value="{!objWrapperSync.objSync.Dont_Delete_Existing_Contacts__c}" style="vertical-align: sub;"></apex:inputCheckbox>
+                      <apex:outputLabel value="{!MSG_SYNC_CHECKBOX}"></apex:outputLabel>
+                      
+                  </apex:outputPanel>
+            </apex:pageBlockSection>
+              <script>
+                      $(document).ready(function(){
+                            onLoad();
+                      });
+              </script>
+               <apex:outputPanel rendered="{!IF(objinwiseLtngConstants.slds == NULL, false,true)}">
+                        <style>
+                              .apexp .bPageBlock.apexDefaultPageBlock .pbBody .pbSubheader {
+                                    background-color: rgb(248, 248, 248);
+                                    border-top: 0 none;
+                                    color: black;
+                                }
+                        </style>
+               </apex:outputPanel> 
+             </apex:pageBlock> 
+      </apex:form>
+  </div>
+      <c:TagManager />
+
+</apex:page>

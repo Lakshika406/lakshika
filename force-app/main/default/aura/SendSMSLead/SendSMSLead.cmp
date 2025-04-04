@@ -1,0 +1,59 @@
+<aura:component controller="SendSMSLeadLtngController" implements="force:lightningQuickActionWithoutHeader,flexipage:availableForAllPageTypes,force:hasRecordId" access="global">
+   
+   <aura:attribute name="recordId" type="Id" />
+   <aura:attribute name="smsbody" type="string"/>
+   <aura:attribute name="phonenumber" type="string"/>
+   <aura:handler name="init" value="{!this}" action="{!c.doInIt}" />
+
+   <div class="slds-page-header" role="banner">
+      <h1 class="slds-page-header__title slds-m-right--small slds-align-middle slds-truncate" title="this should match">
+         Send SMS
+      </h1>
+      <div class="slds-text-color--weak">by inwise.com</div>
+   </div>
+  
+   <!---Part 4 [mail fourm part]-->   
+   <div class="slds-m-around_medium">
+      <div class="slds-container--medium">
+         <div class="slds-form--stacked">
+            <div class="slds-form-element">
+               <label class="slds-form-element__label" for="CC">Mobile No</label>
+               <div class="slds-form-element__control">
+                  <ui:inputSelect multiple="false" aura:id="phonenumber"></ui:inputSelect>
+               </div>
+            </div>
+            <!--<div class="slds-grid">
+               <div class="slds-col">Column 1</div>
+               <div class="slds-col">Column 2</div>
+            </div>-->     
+            <div class="slds-form-element">
+               <label class="slds-form-element__label" for="CC">Merge Lead Fields</label>
+               <div class="slds-form-element__control">
+                  <ui:inputSelect multiple="false" aura:id="Leadfields" change="{!c.onChangeMergeField}"></ui:inputSelect>
+               </div>
+            </div>
+            <div class="slds-form-element">
+               <label class="slds-form-element__label" for="CC">Choose Template</label>
+               <div class="slds-form-element__control">
+                  <ui:inputSelect multiple="false" aura:id="templates" change="{!c.onChangeTemplate}"></ui:inputSelect>
+               </div>
+            </div>
+            <div class="slds-form-element">
+               <label class="slds-form-element__label" for="CC">Landing Pages</label>
+               <div class="slds-form-element__control">
+                  <ui:inputSelect multiple="false" aura:id="landingpages" change="{!c.onChangeLandingPage}"></ui:inputSelect>
+               </div>
+            </div>
+            <div class="slds-form-element">
+               <label class="slds-form-element__label" for="CC">SMS Body</label>
+               <div class="slds-form-element__control">
+                  <ui:inputTextArea aura:id="smsbody" rows="5"></ui:inputTextArea>
+               </div>
+            </div>
+            <div class="slds-form-element">    
+               <button class="slds-button slds-button--brand" onclick="{!c.doSendSMS}">Send</button>
+            </div>
+         </div>
+      </div>
+   </div>
+</aura:component>

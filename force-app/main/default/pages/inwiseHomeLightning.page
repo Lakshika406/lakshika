@@ -1,0 +1,4 @@
+<apex:page showHeader="true" standardStylesheets="false"  docType="html-5.0" standardController="Account__c" extensions="inwiseSetupController">
+       <c:TagManager />
+
+</apex:page>

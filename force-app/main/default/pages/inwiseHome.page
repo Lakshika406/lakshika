@@ -1,0 +1,595 @@
+<apex:page standardController="Account__c" extensions="inwiseSetupController" sidebar="true" id="page1" tabStyle="Inwise_Setup__tab" docType="html-5.0">
+    <c:inwiseUtilHeader />
+    <!-- <apex:stylesheet value="https://opensource.keycdn.com/fontawesome/4.7.0/font-awesome.min.css"/> -->
+    <style>
+        .introjs-tooltip, .introjs-helperLayer, .introjs-relativePosition {
+            font-family:Arial,Helvetica,sans-serif;
+        }
+        header {   
+            padding:0px 15px 15px;
+            border-radius:6px 6px 0 0;
+            text-align:center;
+            font-size:20px;
+            line-height:1.5;
+        
+        }
+        header h1 {   
+            font-size:31px;
+            font-weight:600;
+            margin:10px auto 2px;
+            text-align:left;
+        }
+        header p {   
+            font-size:17px;
+            text-align:left;   
+            margin:0 auto;
+        }
+        header img {   
+            float:left;
+            margin:20px 0 0;
+        }
+        section {
+            background:#eee;
+            padding:10px;
+        }
+        p {
+            font-size: 17px;
+            text-align: left;
+            margin: 0 auto;  
+        }
+        h1 {
+            font-size: 31px;
+            font-weight: 600;
+            margin: 10px auto 2px;
+            text-align: left;
+        }
+        section h2 {
+            font-size:17px;
+            text-align:center;
+        }
+        section .wel-item {
+            width:33%;
+            text-align:center;
+            margin:0 0 8px 0;
+        }
+        section .wel-item span {
+            display:inline-block;
+            font-size:15px;
+            margin:5px 0;
+        }
+        section .fa {   
+            font-size:34px;
+            color:#878888;
+            display:block;
+            height:50px;
+            margin-top:2px;
+        }
+        section .fa-mobile {
+            font-size:47px;
+            margin-top:-2px;
+            margin-bottom:4px;
+        }
+        .floatA {float:left;}
+    </style>
+    <div class="{!objinwiseLtngConstants.slds}">
+        <apex:form >
+            <script>
+                function onGetToken(aId){
+                    doGetToken(aId);               
+                }  
+                function onDeleteAccount(aId){
+                    var r = confirm("Are you sure!");
+                    if (r == true) {
+                        doDeleteAccount(aId);
+                    }   
+                }                
+                function onDelete(sid){
+                    var r = confirm("Are you sure!");
+                    if (r == true) {
+                        doDeleteSync(sid);
+                    }   
+                }
+                function onDeleteLandingSync(sid){
+                    var r = confirm("Are you sure!");
+                    if (r == true) {
+                        doDeleteLandingSync(sid);
+                    }   
+                }
+                function onExecuteLandingSync(sid){
+                    doExecuteLandingSync(sid);
+                }
+                function callSortResults(sortColumn,isAscSort){
+                    jsSortResults(sortColumn,isAscSort);
+                }
+                function callSortResultCampaign(sortColumn,isAscSort){
+                    jsSortResultsCampaign(sortColumn,isAscSort);
+                }
+                $(document).ready(function(){
+                    var htmlElement =  '<div data-step="1" data-position="right" positionPrecedence="bottom" id="spaninwiseFeature" style="width:140px;"> </div> ';
+                    $(".pageDescription").wrap(htmlElement);
+                    $("#spaninwiseFeature").attr('data-intro','{!$Label.inwise__StartTour_inwise_welcomePage}');
+            
+                    if({!objInwiseUtil.objInwiseSetting.Overlay_Help__c}){
+                            startTour(true);
+                    }
+                });  
+            </script>
+            <apex:outputPanel id="pnlinwiseToken">
+                <script type="text/javascript">
+                    function getAuthToken(){
+                        var url = '{!URLENCODE("https://app.inwise.com/default.aspx")}?token=';
+                        var authToken = '{!URLENCODE(authenticationToken)}';
+                        if(authToken != ""){
+                            url = decodeURIComponent(url + authToken);
+                            if(isLightningExperienceOrSalesforce1()){ 
+                                sforce.one.navigateToURL(url);
+                            }else{ 
+                                window.open(url);
+                            }   
+                        }
+                    }
+                </script>
+            </apex:outputPanel>
+            <apex:actionFunction name="doGetToken" action="{!getAuthenticationToken}" immediate="true"  rerender="pnlinwiseToken,msg" status="status4" oncomplete="getAuthToken();">
+                <apex:param name="selectedAccId" assignTo="{!selectedAccId}" id="selectedAccId" value=""  /> 
+            </apex:actionFunction> 
+            <apex:actionFunction name="doSyncOptOut" action="{!doSyncoptout}" immediate="true"  rerender="msg" status="status4">
+                <apex:param name="selectedAccId" assignTo="{!selectedAccId}" id="selectedAccId2" value=""  /> 
+            </apex:actionFunction>     
+            <apex:actionFunction name="doDeleteSync" action="{!deleteSync}" immediate="true"  rerender="block3" status="status2">
+                <apex:param name="toDeleteId" assignTo="{!toDeleteId}" id="toDeleteId" value=""  /> 
+            </apex:actionFunction>
+             <apex:actionFunction name="doDeleteLandingSync" action="{!deleteLandingSync}" immediate="true"  rerender="block4" status="status3">
+                <apex:param name="toDeleteId" assignTo="{!toDeleteId}" id="toDeleteId2" value=""  /> 
+            </apex:actionFunction>
+            <apex:actionFunction name="doExecuteLandingSync" action="{!doExecuteLandingSync}" immediate="true"  rerender="block4" status="status3">
+                <apex:param name="executeSyncId" assignTo="{!executeSyncId}" id="executeSyncId" value=""  /> 
+            </apex:actionFunction>
+            <apex:actionFunction status="status2" name="jsSortResults" action="{!sortResults}" rerender="tblSyncList" >
+                <apex:param name="sortColumn" id="sortColumn" value="" assignto="{!objWrapperPaging.sortColumn}" />
+                <apex:param name="isAscSort" id="isAscSort" value="" assignto="{!objWrapperPaging.isAscSort}" />
+              </apex:actionFunction>  
+            <apex:actionFunction status="status3" name="jsLandingSyncSortResults" action="{!sortLandingSyncResults}" rerender="tblLandingSyncList" >
+                <apex:param name="sortColumn" id="sortColumn2" value="" assignto="{!objWrapperPagingLandingSync.sortColumn}" />
+                <apex:param name="isAscSort" id="isAscSort2" value="" assignto="{!objWrapperPagingLandingSync.isAscSort}" />
+            </apex:actionFunction>
+            <apex:actionFunction status="status5" name="jsSortResultsCampaign" action="{!sortResultsCampaign}" rerender="tblCampaignList" >
+                <apex:param name="sortColumn3" id="sortColumn3" value="" assignto="{!objWrapperPagingCampaign.sortColumn}" />
+                <apex:param name="isAscSort3" id="isAscSort3" value="" assignto="{!objWrapperPagingCampaign.isAscSort}" />
+            </apex:actionFunction>
+            <apex:actionFunction name="jsToggleshowhelp" action="{!toggleshowhelp}" immediate="true"  rerender="msg" status="status4" oncomplete="hideTour();">
+                <apex:param assignTo="{!isHelpOnload}" value="" id="isHelpOnload" name="isHelpOnload" />
+            </apex:actionFunction> 
+            <div data-step="2" data-intro="{!$Label.StartTour_inwiseHome_1}{!$Label.StartTour_inwiseHome_1_1}" style="float:left;"></div>
+            <apex:sectionHeader title="" subTitle="inwise" help="https://www.inwise.com"></apex:sectionHeader>
+            <apex:pageMessages id="msg"/>
+
+            <apex:pageBlock id="block1" title="inwise Accounts">
+                <apex:pageBlockButtons location="top">
+                    <!--  <div data-step="1" data-intro="Add account" style="float:left;"> -->
+                    <div data-step="3" data-intro="{!$Label.StartTour_inwiseHome_2}" style="float:left;">
+                        <apex:commandButton value="Accounts Configurations" action="{!doInwiseSetup}" rendered="{!isAdminUser}" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/>
+                        </div> 
+                        <apex:commandButton value="Settings" rendered="{!isAdminUser}" action="/{!$Page.inwiseSettings}" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                        <apex:actionStatus id="status4" startText="Please wait....">
+                            <apex:facet name="start"><img  src="/img/loading.gif" /></apex:facet>
+                            <apex:facet name="stop"></apex:facet>
+                    </apex:actionStatus>      
+                </apex:pageBlockButtons>
+                <apex:pageBlockSection id="Section1" columns="1" >
+                    <apex:pageBlockTable rendered="{!listOfInwiseSetup.Size>0}" var="l" value="{!listOfInwiseSetup}" styleClass="{!objinwiseLtngConstants.sldsTableSldsTableBorderedSldsTableStriped}">
+                        <apex:column width="35%">
+                            <apex:facet name="header">Action</apex:facet>
+                            <apex:outputPanel >
+                                <div data-step="4" data-intro="{!$Label.StartTour_inwiseHome_3}" style="float:left;">
+                                    <a href="javascript:void(0);" onclick="onGetToken('{!l.Id}');return false;" >Login</a> |
+                                </div>&nbsp;
+                                <div style="{!IF((isAdminUser == true), 'display:contents', 'display:none')}">
+                                    <a href="javascript:void(0);" onclick="redirectToURL('/{!l.Id}/e?retURL=/{!$Page.inwiseHome}')">Edit</a> |
+                                </div>
+                                <a href="javascript:void(0);" onclick="redirectToURL('{!$Page.InwiseSync}?aid={!l.Id}&retURL=/{!$Page.inwiseHome}')" >Field Mapping</a> |
+                                <a href="javascript:void(0);" onclick="doSyncOptOut('{!l.Id}')" >Sync opt-out</a>
+                            </apex:outputPanel>
+                        </apex:column> 
+                        <apex:column width="35%">
+                            <apex:facet name="header">
+                                inwise account
+                            </apex:facet>
+                            <apex:outputLabel value="{!l.Name}" />
+                        </apex:column>
+                        <apex:column width="15%">
+                            <apex:facet name="header">
+                                {!$ObjectType.Account__c.fields.Default__c.Label}
+                            </apex:facet>
+                            <apex:outputfield value="{!l.Default__c}" />
+                        </apex:column>
+                        <apex:column width="*">
+                        </apex:column>
+                    </apex:pageBlockTable>
+                    <apex:outputLabel value="No record(s) found."  rendered="{!listOfInwiseSetup.Size == 0}" style="font-weight:bold;"/>
+                </apex:pageBlockSection> 
+                <apex:actionFunction name="doDeleteAccount" action="{!deleteAccount}" immediate="true"  rerender="Section1" status="status4">
+                        <apex:param name="toDeleteId" assignTo="{!toDeleteId}" id="toDeleteId" value=""  /> 
+                </apex:actionFunction>
+                <apex:actionFunction name="doDeleteMapping" action="{!deleteMapping}" immediate="true"  rerender="Section1" status="status4">
+                    <apex:param name="toDeleteId" assignTo="{!toDeleteId}" id="toDeleteId2" value=""  /> 
+                </apex:actionFunction>
+                <apex:outputLabel value="No default account(s) & mapping(s) for that default account configured" rendered="{!NOT(isEligibleToProceed)}" style="font-weight: bold;"/>
+            </apex:pageBlock>
+
+            <!-- LANDING SYNC SECTION START -->
+            <apex:pageBlock id="block4" title="Sync leads from inwise forms">
+                <apex:pageBlockButtons location="top">
+                    <div data-step="5" data-intro=" {!$Label.StartTour_inwiseHome_4}" style="float:left;">
+                        <apex:commandButton value="New Sync" action="{!doLandingPageSyncfromSFtoInwise}" rendered="{!isEligibleToProceed}" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/>
+                    </div>
+                    <apex:actionStatus id="status3" startText="Please wait....">
+                        <apex:facet name="start"><img  src="/img/loading.gif" /></apex:facet>
+                        <apex:facet name="stop"></apex:facet>
+                    </apex:actionStatus>
+                </apex:pageBlockButtons>
+
+                <apex:pageBlockSection columns="1"  rendered="{!IF(listOfWrapperLandingSync.Size>0,true,false)}" id="tblLandingSyncList">
+                    <apex:pageBlockTable value="{!listOfWrapperLandingSync}" var="l" styleClass="{!objinwiseLtngConstants.sldsTableSldsTableBorderedSldsTableStriped}">
+                        <apex:column >
+                            <apex:facet name="header">Action</apex:facet>
+                            <apex:outputPanel >
+                                <a href="javascript:void(0);" onclick="redirectToURL('/{!l.objLandingSync.Id}/e?retURL=/{!$Page.inwiseHome}')">Edit</a> |
+                                <a href="javascript:void(0);" onclick="onDeleteLandingSync('{!l.objLandingSync.Id}')">Delete</a> |
+                                <a href="javascript:void" onclick="onExecuteLandingSync('{!l.objLandingSync.Id}')">Execute</a>
+                            </apex:outputPanel>
+                        </apex:column>
+                        <!--              <apex:column >
+                                            <apex:facet name="header">
+                                                        Schedule
+                                            </apex:facet>
+                                            <a href="javascript:void" onclick="redirectToURL('{!$Page.inwiseLandingSyncScheduleJob}?Id={!l.objLandingSync.Id}&retUrl={!$Page.inwiseHome}')">Schedule</a>
+                                    </apex:column>       -->
+                        <apex:column >
+                            <apex:facet name="header">
+                                <apex:outputLink onclick="callLandingSyncSortResults('Name',{!NOT(objWrapperPagingLandingSync.isAscSort)});return false;" value="">
+                                    Sync Name
+                                    <apex:image title="{!IF(AND(objWrapperPagingLandingSync.sortColumn = 'Name',objWrapperPagingLandingSync.isAscSort),'Sorted Ascending', 'Sorted Descending')}"
+                                                styleClass="{!IF(AND(objWrapperPagingLandingSync.sortColumn = 'Name',objWrapperPagingLandingSync.isAscSort),'sortAsc', 'sortDesc')}"
+                                                alt=""
+                                                rendered="{!objWrapperPagingLandingSync.sortColumn = 'Name'}"
+                                                value="/s.gif"/>
+                                </apex:outputLink>
+                            </apex:facet>
+                            <apex:outputLink value="/{!l.objLandingSync.Id}" target="_blank">{!l.objLandingSync.Name}</apex:outputLink>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">
+                                <apex:outputLink onclick="callLandingSyncSortResults('Landing_Page_Name__c',{!NOT(objWrapperPagingLandingSync.isAscSort)});return false;" value="">
+                                    Landing Page/Popup Name
+                                    <apex:image title="{!IF(AND(objWrapperPagingLandingSync.sortColumn = 'Landing_Page_Name__c',objWrapperPagingLandingSync.isAscSort),'Sorted Ascending', 'Sorted Descending')}"
+                                                styleClass="{!IF(AND(objWrapperPagingLandingSync.sortColumn = 'Landing_Page_Name__c',objWrapperPagingLandingSync.isAscSort),'sortAsc', 'sortDesc')}"
+                                                alt=""
+                                                rendered="{!objWrapperPagingLandingSync.sortColumn = 'Landing_Page_Name__c'}"
+                                                value="/s.gif"/>
+                                </apex:outputLink>
+                            </apex:facet>
+                            <apex:outputField value="{!l.objLandingSync.Landing_Page_Name__c}" />
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">
+                                <apex:outputLink onclick="callLandingSyncSortResults('Last_Run_By__c',{!NOT(objWrapperPagingLandingSync.isAscSort)});return false;" value="">
+                                    Last Run By
+                                    <apex:image title="{!IF(AND(objWrapperPagingLandingSync.sortColumn = 'Last_Run_By__c',objWrapperPagingLandingSync.isAscSort),'Sorted Ascending', 'Sorted Descending')}"
+                                                styleClass="{!IF(AND(objWrapperPagingLandingSync.sortColumn = 'Last_Run_By__c',objWrapperPagingLandingSync.isAscSort),'sortAsc', 'sortDesc')}"
+                                                alt=""
+                                                rendered="{!objWrapperPagingLandingSync.sortColumn = 'Last_Run_By__c'}"
+                                                value="/s.gif"/>
+                                </apex:outputLink>
+                            </apex:facet>
+                            <apex:outputField value="{!l.objLandingSync.Last_Run_By__c}" />
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">
+                                <apex:outputLink onclick="callLandingSyncSortResults('Last_Run__c',{!NOT(objWrapperPagingLandingSync.isAscSort)});return false;" value="">
+                                    Last Run On
+                                    <apex:image title="{!IF(AND(objWrapperPagingLandingSync.sortColumn = 'Last_Run__c',objWrapperPagingLandingSync.isAscSort),'Sorted Ascending', 'Sorted Descending')}"
+                                                styleClass="{!IF(AND(objWrapperPagingLandingSync.sortColumn = 'Last_Run__c',objWrapperPagingLandingSync.isAscSort),'sortAsc', 'sortDesc')}"
+                                                alt=""
+                                                rendered="{!objWrapperPagingLandingSync.sortColumn = 'Last_Run__c'}"
+                                                value="/s.gif"/>
+                                </apex:outputLink>
+                            </apex:facet>
+                            <apex:outputField value="{!l.objLandingSync.Last_Run__c}" />
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">
+                                Remark
+                            </apex:facet>
+                            <apex:outputLabel value="Soon!" rendered="{!l.isNeedToShowClock}" style="color: red;font-weight: bold;" />
+                        </apex:column>
+                    </apex:pageBlockTable>
+                    <apex:outputPanel rendered="{!IF(listOfWrapperLandingSync.Size>0,true,false)}">
+                        <apex:CommandButton value="Prev" action="{!PreviousLandingSync}"  rerender="tblLandingSyncList" disabled="{!hasPreviousLandingSync}" status="status3" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                        <apex:CommandButton value="Next" action="{!NextLandingSync}"  rerender="tblLandingSyncList" disabled="{!hasNextLandingSync}" status="status3" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/>&nbsp;
+                        <apex:outputlabel value="{!objWrapperPagingLandingSync.paginationString}" style="font-weight:bold;font-size:11px;"></apex:outputlabel>
+                    </apex:outputPanel>
+                </apex:pageBlockSection>
+                <apex:pageBlockSection columns="1"  rendered="{!IF(listOfWrapperLandingSync.Size>0,false,true)}">
+                    <apex:outputLabel value="No Record(s) found." style="font-weight: bold;" />
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+            <!-- LANDING SYNC SECTION END -->
+
+            <!--NORMAL SYNC SECTION START -->
+            <apex:pageBlock id="block3" title="Sync contacts and leads to inwise">
+                <apex:pageBlockButtons location="top">
+                        <div data-step="6" data-intro="{!$Label.StartTour_inwiseHome_5}" style="float:left;">
+                            <apex:commandButton value="New Sync (Manually)" action="{!doSyncfromSFtoInwise}"  rendered="{!isEligibleToProceed}" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/>
+                            <apex:commandButton value="New Sync (Existing Views)" action="{!doSyncfromSFtoInwiseViews}"  rendered="{!isEligibleToProceed}" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/>
+                            <apex:commandButton value="New Sync (Existing Reports)" action="{!doSyncfromSFtoInwiseReports}"  rendered="{!isEligibleToProceed}" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/>
+                        </div>    
+                        <apex:actionStatus id="status2" startText="Please wait....">
+                            <apex:facet name="start"><img  src="/img/loading.gif" /></apex:facet>
+                            <apex:facet name="stop"></apex:facet>
+                        </apex:actionStatus>      
+                </apex:pageBlockButtons>    
+        
+                <apex:pageBlockSection columns="1" rendered="{!IF(listOfWrapperSync.Size>0,true,false)}" id="tblSyncList">
+                        <apex:pageBlockTable value="{!listOfWrapperSync}" var="l" styleClass="{!objinwiseLtngConstants.sldsTableSldsTableBorderedSldsTableStriped}">
+                                    <apex:column width="8%">
+                                                <apex:facet name="header">Action</apex:facet>
+                                                    <apex:outputPanel >
+                                                    <a href="javascript:void(0);" onclick="redirectToURL('/{!l.objSync.Id}/e?retURL=/{!$Page.inwiseHome}')">Edit</a> | 
+                                                    <a href="javascript:void(0);" onclick="onDelete('{!l.objSync.Id}')">Delete</a>
+                                                    </apex:outputPanel>  
+                                        </apex:column>  
+                                        <apex:column width="6%">
+                                                <apex:facet name="header">
+                                                            Schedule
+                                                </apex:facet>
+                                                <a href="javascript:void" onclick="redirectToURL('{!$Page.inwiseScheduleJob}?Id={!l.objSync.Id}&retUrl={!$Page.inwiseHome}')">Schedule</a> 
+                                        </apex:column>      
+                                        <apex:column >
+                                                <apex:facet name="header">
+                                                    <apex:outputLink onclick="callSortResults('Name',{!NOT(objWrapperPaging.isAscSort)});return false;" value="">
+                                                        Sync Name
+                                                        <apex:image title="{!IF(AND(objWrapperPaging.sortColumn = 'Name',objWrapperPaging.isAscSort),'Sorted Ascending', 'Sorted Descending')}" 
+                                                                    styleClass="{!IF(AND(objWrapperPaging.sortColumn = 'Name',objWrapperPaging.isAscSort),'sortAsc', 'sortDesc')}" 
+                                                                    alt=""  
+                                                                    rendered="{!objWrapperPaging.sortColumn = 'Name'}"
+                                                                    value="/s.gif"/> 
+                                                    </apex:outputLink>    
+                                                </apex:facet>
+                                                <a href="javascript:void" onclick="redirectToURL('/{!l.objSync.Id}')">{!l.objSync.Name}</a>                                        
+                                        </apex:column>
+                                        <apex:column >
+                                                <apex:facet name="header">
+                                                        <apex:outputLink onclick="callSortResults('Group_Name__c',{!NOT(objWrapperPaging.isAscSort)});return false;" value="">
+                                                            Group Name
+                                                            <apex:image title="{!IF(AND(objWrapperPaging.sortColumn = 'Group_Name__c',objWrapperPaging.isAscSort),'Sorted Ascending', 'Sorted Descending')}" 
+                                                                        styleClass="{!IF(AND(objWrapperPaging.sortColumn = 'Group_Name__c',objWrapperPaging.isAscSort),'sortAsc', 'sortDesc')}" 
+                                                                        alt=""  
+                                                                        rendered="{!objWrapperPaging.sortColumn = 'Group_Name__c'}"
+                                                                        value="/s.gif"/> 
+                                                        </apex:outputLink>    
+                                                </apex:facet>
+                                                <apex:outputLabel value="{!l.objSync.Group_Name__c}" />
+                                        </apex:column>
+                                        <apex:column >
+                                                <apex:facet name="header">
+                                                    <apex:outputLink onclick="callSortResults('Contacts__c',{!NOT(objWrapperPaging.isAscSort)});return false;" value="">
+                                                            Contacts
+                                                            <apex:image title="{!IF(AND(objWrapperPaging.sortColumn = 'Contacts__c',objWrapperPaging.isAscSort),'Sorted Ascending', 'Sorted Descending')}" 
+                                                                        styleClass="{!IF(AND(objWrapperPaging.sortColumn = 'Contacts__c',objWrapperPaging.isAscSort),'sortAsc', 'sortDesc')}" 
+                                                                        alt=""  
+                                                                        rendered="{!objWrapperPaging.sortColumn = 'Contacts__c'}"
+                                                                        value="/s.gif"/> 
+                                                        </apex:outputLink>    
+                                                </apex:facet>
+                                                <apex:outputField value="{!l.objSync.Contacts__c}" />
+                                        </apex:column>
+                                        <apex:column >
+                                                <apex:facet name="header">
+                                                        <apex:outputLink onclick="callSortResults('Leads__c',{!NOT(objWrapperPaging.isAscSort)});return false;" value="">
+                                                            Leads
+                                                            <apex:image title="{!IF(AND(objWrapperPaging.sortColumn = 'Leads__c',objWrapperPaging.isAscSort),'Sorted Ascending', 'Sorted Descending')}" 
+                                                                        styleClass="{!IF(AND(objWrapperPaging.sortColumn = 'Leads__c',objWrapperPaging.isAscSort),'sortAsc', 'sortDesc')}" 
+                                                                        alt=""  
+                                                                        rendered="{!objWrapperPaging.sortColumn = 'Leads__c'}"
+                                                                        value="/s.gif"/> 
+                                                        </apex:outputLink>    
+                                                </apex:facet>
+                                                <apex:outputField value="{!l.objSync.Leads__c}" />
+                                        </apex:column>
+                                        <apex:column >
+                                                <apex:facet name="header">
+                                                    <apex:outputLink onclick="callSortResults('Scheduled_Daily_At__c',{!NOT(objWrapperPaging.isAscSort)});return false;" value="">
+                                                                    Scheduled Daily At
+                                                            <apex:image title="{!IF(AND(objWrapperPaging.sortColumn = 'Scheduled_Daily_At__c',objWrapperPaging.isAscSort),'Sorted Ascending', 'Sorted Descending')}" 
+                                                                        styleClass="{!IF(AND(objWrapperPaging.sortColumn = 'Scheduled_Daily_At__c',objWrapperPaging.isAscSort),'sortAsc', 'sortDesc')}" 
+                                                                        alt=""  
+                                                                        rendered="{!objWrapperPaging.sortColumn = 'Scheduled_Daily_At__c'}"
+                                                                        value="/s.gif"/> 
+                                                        </apex:outputLink>    
+                                                </apex:facet>
+                                                <apex:outputField value="{!l.objSync.Scheduled_Daily_At__c}" />
+                                        </apex:column>
+                                        <apex:column >
+                                                <apex:facet name="header">
+                                                    <apex:outputLink onclick="callSortResults('Last_Run_By__c',{!NOT(objWrapperPaging.isAscSort)});return false;" value="">
+                                                                    Last Run By
+                                                            <apex:image title="{!IF(AND(objWrapperPaging.sortColumn = 'Last_Run_By__c',objWrapperPaging.isAscSort),'Sorted Ascending', 'Sorted Descending')}" 
+                                                                        styleClass="{!IF(AND(objWrapperPaging.sortColumn = 'Last_Run_By__c',objWrapperPaging.isAscSort),'sortAsc', 'sortDesc')}" 
+                                                                        alt=""  
+                                                                        rendered="{!objWrapperPaging.sortColumn = 'Last_Run_By__c'}"
+                                                                        value="/s.gif"/> 
+                                                        </apex:outputLink>    
+                                                </apex:facet>
+                                                <apex:outputField value="{!l.objSync.Last_Run_By__c}" />
+                                        </apex:column>
+                                        <apex:column >
+                                                <apex:facet name="header">
+                                                    <apex:outputLink onclick="callSortResults('Last_Run__c',{!NOT(objWrapperPaging.isAscSort)});return false;" value="">
+                                                                    Last Run On
+                                                            <apex:image title="{!IF(AND(objWrapperPaging.sortColumn = 'Last_Run__c',objWrapperPaging.isAscSort),'Sorted Ascending', 'Sorted Descending')}" 
+                                                                        styleClass="{!IF(AND(objWrapperPaging.sortColumn = 'Last_Run__c',objWrapperPaging.isAscSort),'sortAsc', 'sortDesc')}" 
+                                                                        alt=""  
+                                                                        rendered="{!objWrapperPaging.sortColumn = 'Last_Run__c'}"
+                                                                        value="/s.gif"/> 
+                                                        </apex:outputLink>   
+                                                </apex:facet>
+                                                <apex:outputField value="{!l.objSync.Last_Run__c}" />
+                                        </apex:column>
+                                        <apex:column >
+                                                <apex:facet name="header">
+                                                    <apex:outputLink onclick="callSortResults('Account__c',{!NOT(objWrapperPaging.isAscSort)});return false;" value="">
+                                                                    Account
+                                                            <apex:image title="{!IF(AND(objWrapperPaging.sortColumn = 'Account__c',objWrapperPaging.isAscSort),'Sorted Ascending', 'Sorted Descending')}" 
+                                                                        styleClass="{!IF(AND(objWrapperPaging.sortColumn = 'Account__c',objWrapperPaging.isAscSort),'sortAsc', 'sortDesc')}" 
+                                                                        alt=""  
+                                                                        rendered="{!objWrapperPaging.sortColumn = 'Account__c'}"
+                                                                        value="/s.gif"/> 
+                                                        </apex:outputLink>   
+                                                </apex:facet>
+                                                <apex:outputLabel value="{!l.objSync.Account__r.Name}" />
+                                        </apex:column>
+                                            <apex:column >
+                                                <apex:facet name="header">
+                                                            Remark
+                                                </apex:facet>
+                                                <apex:outputLabel value="Soon!" rendered="{!l.isNeedToShowClock}" style="color: red;font-weight: bold;" />
+                                        </apex:column>
+                                </apex:pageBlockTable> 
+                                <apex:outputPanel rendered="{!IF(listOfWrapperSync.Size>0,true,false)}">
+                                        <apex:CommandButton value="Prev" action="{!Previous}"  rerender="tblSyncList" disabled="{!hasPrevious}" status="status2" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/>
+                                        <apex:CommandButton value="Next" action="{!Next}"  rerender="tblSyncList" disabled="{!hasNext}" status="status2" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />&nbsp;
+                                        <apex:outputlabel value="{!objWrapperPaging.paginationString}" style="font-weight:bold;font-size:11px;" ></apex:outputlabel>
+                                </apex:outputPanel>    
+                </apex:pageBlockSection>
+                <apex:pageBlockSection columns="1"  rendered="{!IF(listOfWrapperSync.Size>0,false,true)}">
+                            <apex:outputLabel value="No Record(s) found." style="font-weight: bold;" />
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+            <!--NORMAL SYNC SECTION END -->
+        
+            <!-- Campaign Section -->
+            <apex:pageBlock id="block5" title="Salesforce Campaigns">
+                <apex:pageBlockButtons location="top">
+                    <apex:commandButton value="New Salesforce Campaign" action="{!URLFOR($Action.Campaign.New)}" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                    <apex:actionStatus id="status5" startText="Please wait....">
+                        <apex:facet name="start"><img  src="/img/loading.gif" /></apex:facet>
+                        <apex:facet name="stop"></apex:facet>
+                    </apex:actionStatus>
+                </apex:pageBlockButtons>
+                <apex:pageBlockSection columns="1"  rendered="{!IF(listOfCampaign.Size>0,true,false)}" id="tblCampaignList">
+                    <apex:pageBlockTable value="{!listOfCampaign}" var="l" styleClass="{!objinwiseLtngConstants.sldsTableSldsTableBorderedSldsTableStriped}">
+                        <apex:column >
+                            <apex:facet name="header">Action</apex:facet>
+                            <apex:outputPanel >
+                                <a href="javascript:void(0);" onclick="redirectToURL('/{!l.Id}/e?retURL=/{!$Page.inwiseHome}')">Edit</a> |
+                                <a href="javascript:void(0);" onclick="redirectToURL('/{!l.Id}?retURL=/{!$Page.inwiseHome}')">View</a>
+
+                            </apex:outputPanel>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">
+                                <apex:outputLink onclick="callSortResultCampaign('LastModifiedDate',{!NOT(objWrapperPagingCampaign.isAscSort)});return false;" value="">
+                                    Last Modified
+                                    <apex:image title="{!IF(AND(objWrapperPagingCampaign.sortColumn = 'LastModifiedDate',objWrapperPagingCampaign.isAscSort),'Sorted Ascending', 'Sorted Descending')}"
+                                                styleClass="{!IF(AND(objWrapperPagingCampaign.sortColumn = 'LastModifiedDate',objWrapperPagingCampaign.isAscSort),'sortAsc', 'sortDesc')}"
+                                                alt=""
+                                                rendered="{!objWrapperPagingCampaign.sortColumn = 'LastModifiedDate'}"
+                                                value="/s.gif"/>
+                                </apex:outputLink>
+                            </apex:facet>
+                            <apex:outputField value="{!l.LastModifiedDate}"></apex:outputField>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">
+                                <apex:outputLink onclick="callSortResultCampaign('Name',{!NOT(objWrapperPagingCampaign.isAscSort)});return false;" value="">
+                                    Campaign Name
+                                    <apex:image title="{!IF(AND(objWrapperPagingCampaign.sortColumn = 'Name',objWrapperPagingCampaign.isAscSort),'Sorted Ascending', 'Sorted Descending')}"
+                                                styleClass="{!IF(AND(objWrapperPagingCampaign.sortColumn = 'Name',objWrapperPagingCampaign.isAscSort),'sortAsc', 'sortDesc')}"
+                                                alt=""
+                                                rendered="{!objWrapperPagingCampaign.sortColumn = 'Name'}"
+                                                value="/s.gif"/>
+                                </apex:outputLink>
+                            </apex:facet>
+                            <apex:outputField value="{!l.Name}"></apex:outputField>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">
+                            <apex:outputLink onclick="callSortResultCampaign('Campaign_Type__c',{!NOT(objWrapperPagingCampaign.isAscSort)});return false;" value="">
+                                Campaign Type
+                                <apex:image title="{!IF(AND(objWrapperPagingCampaign.sortColumn = 'Campaign_Type__c',objWrapperPagingCampaign.isAscSort),'Sorted Ascending', 'Sorted Descending')}"
+                                            styleClass="{!IF(AND(objWrapperPagingCampaign.sortColumn = 'Campaign_Type__c',objWrapperPagingCampaign.isAscSort),'sortAsc', 'sortDesc')}"
+                                            alt=""
+                                            rendered="{!objWrapperPagingCampaign.sortColumn = 'Campaign_Type__c'}"
+                                            value="/s.gif"/>
+                            </apex:outputLink>
+                            </apex:facet>
+                            <apex:outputField value="{!l.Campaign_Type__c}"></apex:outputField>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">
+                                <apex:outputLink onclick="callSortResultCampaign('Sendid__c',{!NOT(objWrapperPagingCampaign.isAscSort)});return false;" value="">
+                                    SendId
+                                    <apex:image title="{!IF(AND(objWrapperPagingCampaign.sortColumn = 'Sendid__c',objWrapperPagingCampaign.isAscSort),'Sorted Ascending', 'Sorted Descending')}"
+                                                styleClass="{!IF(AND(objWrapperPagingCampaign.sortColumn = 'Sendid__c',objWrapperPagingCampaign.isAscSort),'sortAsc', 'sortDesc')}"
+                                                alt=""
+                                                rendered="{!objWrapperPagingCampaign.sortColumn = 'Sendid__c'}"
+                                                value="/s.gif"/>
+                                </apex:outputLink>
+                            </apex:facet>
+                            <apex:outputLabel value="{!l.Sendid__c}"></apex:outputLabel>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">
+                                <apex:outputLink onclick="callSortResultCampaign('Sent__c',{!NOT(objWrapperPagingCampaign.isAscSort)});return false;" value="">
+                                    Sent
+                                    <apex:image title="{!IF(AND(objWrapperPagingCampaign.sortColumn = 'Sent__c',objWrapperPagingCampaign.isAscSort),'Sorted Ascending', 'Sorted Descending')}"
+                                                styleClass="{!IF(AND(objWrapperPagingCampaign.sortColumn = 'Sent__c',objWrapperPagingCampaign.isAscSort),'sortAsc', 'sortDesc')}"
+                                                alt=""
+                                                rendered="{!objWrapperPagingCampaign.sortColumn = 'Sent__c'}"
+                                                value="/s.gif"/>
+                                </apex:outputLink>
+                            </apex:facet>
+                            <apex:outputLabel value="{!l.Sent__c}"></apex:outputLabel>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">
+                                Opened | Unique
+                            </apex:facet>
+                            <apex:outputLabel value="{!l.Opened__c}"></apex:outputLabel> |
+                            <apex:outputLabel value="{!l.Opens_Unique__c}"></apex:outputLabel>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">
+                                Clicked | Unique
+                            </apex:facet>
+                            <apex:outputLabel value="{!l.Opened__c}"></apex:outputLabel> |
+                            <apex:outputLabel value="{!l.Opens_Unique__c}"></apex:outputLabel>
+                        </apex:column>
+                        <apex:column >
+                            <apex:facet name="header">
+                                Bounced
+                            </apex:facet>
+                            <apex:outputLabel value="{!l.Bounced__c}"></apex:outputLabel>
+                        </apex:column>
+
+                    <!--  <apex:repeat value="{!$ObjectType.Campaign.FieldSets.Campaign_Field_Set}" var="f">
+                            <apex:column >
+                                <apex:facet name="header">{!f.Label}</apex:facet>
+                                <apex:outputField value="{!l[f]}" />
+                            </apex:column>
+                        </apex:repeat>-->
+                    </apex:pageBlockTable>
+                    <apex:outputPanel rendered="{!IF(listOfCampaign.Size>0,true,false)}">
+                        <apex:CommandButton value="Prev" action="{!PreviousCampaign}"  rerender="tblCampaignList" disabled="{!hasPreviousCampaign}" status="status5" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                        <apex:CommandButton value="Next" action="{!NextCampaign}"  rerender="tblCampaignList" disabled="{!hasNextCampaign}" status="status5" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/>&nbsp;
+                        <apex:outputlabel value="{!objWrapperPagingCampaign.paginationString}" style="font-weight:bold;font-size:11px;"></apex:outputlabel>
+                    </apex:outputPanel>
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+            <!-- Campaign Section End -->
+        </apex:form>     
+    </div>   
+    <apex:includeScript value="{!URLFOR($Resource.inwiseResource,'js/intro.js')}" />
+    <c:TagManager />
+</apex:page>

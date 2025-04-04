@@ -1,0 +1,183 @@
+<apex:page showHeader="true" sidebar="true" id="page1" tabStyle="Inwise_Setup__tab" controller="OptInOutConfigurationController" docType="html-5.0">
+     <div class="{!objinwiseLtngConstants.slds}">  
+   <apex:form >  
+                 <apex:sectionHeader title="Configuration" subtitle="Opt-in/Out "  id="sectionheader1" ></apex:sectionHeader>
+                 <apex:pageMessages id="msg"/>
+                 <apex:pageBlock id="block1">
+                            <apex:pageBlockButtons location="bottom">
+                                <apex:commandButton value="Save" action="{!doSave}" rendered="{!NOT(isSaved)}"/>
+                                <apex:commandButton value="Cancel" action="{!doCancel}" />
+                              <!--   <apex:commandButton value="GoTo Sync List" action="{!gotoHome}" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" ></apex:commandButton> -->
+                          </apex:pageBlockButtons>
+                           <apex:pageBlockSection title="Sync from Salesforce to inwise (email)">
+                                  <apex:inputCheckbox value="{!objInwiseUtil.objInwiseSetting.Toggle_Email_Opt_in_Opt_out__c}"  />
+                                  <apex:outputLabel value=""/>
+                                    <apex:pageBlockSectionItem >
+                                       <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Contact_Email_Opt_in_Opt_out__c.Label}"></apex:outputLabel>
+                                       <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Contact_Email_Opt_in_Opt_out__c}" >
+                                           <apex:selectOptions value="{!listOfSelectOptionFields_Contact}"/>
+                                       </apex:selectList>
+                                   </apex:pageBlockSectionItem>
+                                   <apex:pageBlockSectionItem >
+                                       <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Contact_Email_Opt_in_Opt_out_Field__c.Label}"></apex:outputLabel>
+                                       <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Contact_Email_Opt_in_Opt_out_Field__c}" >
+                                           <apex:selectOptions value="{!listOfSOFields_ContactEmailOptinOutField}"/>
+                                       </apex:selectList>
+                                   </apex:pageBlockSectionItem>
+                                   <apex:pageBlockSectionItem >
+                                       <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Lead_Email_Opt_in_Opt_out__c.Label}"></apex:outputLabel>
+                                       <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Lead_Email_Opt_in_Opt_out__c}" >
+                                           <apex:selectOptions value="{!listOfSelectOptionFields_Lead}"/>
+                                       </apex:selectList>
+                                   </apex:pageBlockSectionItem>
+                                   <apex:pageBlockSectionItem >
+                                       <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Lead_Email_Opt_in_Opt_out_Field__c.Label}"></apex:outputLabel>
+                                       <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Lead_Email_Opt_in_Opt_out_Field__c}" >
+                                           <apex:selectOptions value="{!listOfSOFields_LeadEmailOptinOutField}"/>
+                                       </apex:selectList>
+                                   </apex:pageBlockSectionItem>
+
+                                   <apex:pageBlockSectionItem >
+                                       <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Person_Account_Email_Opt_In_Out__c.Label}"></apex:outputLabel>
+                                       <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Person_Account_Email_Opt_In_Out__c}" >
+                                           <apex:selectOptions value="{!listOfSelectOptionFields_Account}"/>
+                                       </apex:selectList>
+                                   </apex:pageBlockSectionItem>
+                                   <apex:pageBlockSectionItem >
+                                       <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Person_Account_Email_Opt_In_Out_Field__c.Label}"></apex:outputLabel>
+                                       <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Person_Account_Email_Opt_In_Out_Field__c}" >
+                                           <apex:selectOptions value="{!listOfSOFields_AccountEmailOptinOutField}"/>
+                                       </apex:selectList>
+                                   </apex:pageBlockSectionItem>
+                           </apex:pageBlockSection>
+                           <apex:pageBlockSection title="Sync from Salesforce to inwise (mobile)">
+                               <apex:inputCheckbox value="{!objInwiseUtil.objInwiseSetting.Toggle_Mobile_Opt_in_Opt_out__c}"  />
+                               <apex:outputLabel value=""/>
+                               <apex:pageBlockSectionItem >
+                                   <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Contact_Mobile_Opt_in_Opt_out__c.Label}"></apex:outputLabel>
+                                   <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Contact_Mobile_Opt_in_Opt_out__c}" >
+                                       <apex:selectOptions value="{!listOfSelectOptionFields_Contact}"/>
+                                   </apex:selectList>
+                               </apex:pageBlockSectionItem>
+                               <apex:pageBlockSectionItem >
+                                   <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Contact_Mobile_Opt_in_Opt_out_Field__c.Label}"></apex:outputLabel>
+                                   <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Contact_Mobile_Opt_in_Opt_out_Field__c}" >
+                                       <apex:selectOptions value="{!listOfSOFields_ContactMobileOptinOutField}"/>
+                                   </apex:selectList>
+                               </apex:pageBlockSectionItem>
+                               <apex:pageBlockSectionItem >
+                                   <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Lead_Mobile_Opt_in_Opt_out__c.Label}"></apex:outputLabel>
+                                   <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Lead_Mobile_Opt_in_Opt_out__c}" >
+                                       <apex:selectOptions value="{!listOfSelectOptionFields_Lead}"/>
+                                   </apex:selectList>
+                               </apex:pageBlockSectionItem>
+                               <apex:pageBlockSectionItem >
+                                   <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Lead_Mobile_Opt_in_Opt_out_Field__c.Label}"></apex:outputLabel>
+                                   <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Lead_Mobile_Opt_in_Opt_out_Field__c}" >
+                                       <apex:selectOptions value="{!listOfSOFields_LeadMobileOptinOutField}"/>
+                                   </apex:selectList>
+                               </apex:pageBlockSectionItem>
+
+                               <apex:pageBlockSectionItem >
+                                   <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Person_Account_Mobile_Opt_In_Out__c.Label}"></apex:outputLabel>
+                                   <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Person_Account_Mobile_Opt_In_Out__c}" >
+                                       <apex:selectOptions value="{!listOfSelectOptionFields_Account}"/>
+                                   </apex:selectList>
+                               </apex:pageBlockSectionItem>
+                               <apex:pageBlockSectionItem >
+                                   <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Person_Account_Mobile_Opt_In_Out_Field__c.Label}"></apex:outputLabel>
+                                   <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Person_Account_Mobile_Opt_In_Out_Field__c}" >
+                                       <apex:selectOptions value="{!listOfSOFields_AccountMobileOptinOutField}"/>
+                                   </apex:selectList>
+                               </apex:pageBlockSectionItem>
+                           </apex:pageBlockSection>
+                           <apex:pageBlockSection title="Sync inwise to salesforce (email)" columns="2">
+                                <!--<apex:inputCheckbox value="{!objInwiseUtil.objInwiseSetting.Toggle_inwise_Opt_in_Opt_out_Email__c}"  /> -->
+                                <apex:outputPanel >
+                                    <apex:outputLabel value="{!activateFeatureLabel}" style="font-size:10px;font-weight:bold;"/>
+                                    <apex:outputLink value="{!hostUrl}" style="font-size:10px;font-weight:bold;color:blue;" target="_blank">Click</apex:outputlink>
+                                </apex:outputPanel>
+                               <apex:pageBlockSectionItem >
+                                   <apex:actionStatus id="status1" startText="Please wait....">
+                                       <apex:facet name="start"><img  src="/img/loading.gif" /></apex:facet>
+                                       <apex:facet name="stop"></apex:facet>
+                                   </apex:actionStatus>
+                                   <apex:commandButton value="One time sync email unsubscribe from inwise" action="{!doExecuteEmailUnsubscribe}" status="status1" reRender="block1"/>
+                               </apex:pageBlockSectionItem>
+                               <apex:pageBlockSectionItem >
+                                   <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Email_unsubscribe_contact_field__c.Label}"></apex:outputLabel>
+                                   <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Email_unsubscribe_contact_field__c}" >
+                                       <apex:selectOptions value="{!listOfSelectOptionFields_Contact}"/>
+                                   </apex:selectList>
+                               </apex:pageBlockSectionItem>
+                               <apex:pageBlockSectionItem >
+                                   <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Contact_Email_Search_Field__c.Label}"></apex:outputLabel>
+                                   <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Contact_Email_Search_Field__c}" >
+                                       <apex:selectOptions value="{!listOfSOFields_ContactEmailOptinOutField}"/>
+                                   </apex:selectList>
+                               </apex:pageBlockSectionItem>
+                               <apex:pageBlockSectionItem >
+                                   <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Email_unsubscribe_lead_field__c.Label}"></apex:outputLabel>
+                                   <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Email_unsubscribe_lead_field__c}" >
+                                       <apex:selectOptions value="{!listOfSelectOptionFields_Lead}"/>
+                                   </apex:selectList>
+                               </apex:pageBlockSectionItem>
+                               <apex:pageBlockSectionItem >
+                                   <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Lead_Email_Search_Field__c.Label}"></apex:outputLabel>
+                                   <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Lead_Email_Search_Field__c}" >
+                                       <apex:selectOptions value="{!listOfSOFields_LeadEmailOptinOutField}"/>
+                                   </apex:selectList>
+                               </apex:pageBlockSectionItem>
+                                <apex:pageBlockSectionItem >
+                                    <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Opt_in_Out_to_Salesforce_Email_Last_Run__c.Label}"></apex:outputLabel>
+                                    <apex:outputField value="{!objInwiseUtil.objInwiseSetting.Opt_in_Out_to_Salesforce_Email_Last_Run__c}" />
+                                </apex:pageBlockSectionItem>
+                        </apex:pageBlockSection>
+                       <apex:pageBlockSection title="Sync inwise to salesforce (mobile)" columns="2">       
+                              <!--<apex:inputCheckbox value="{!objInwiseUtil.objInwiseSetting.Toggle_inwise_Opt_in_Opt_out_Mobile__c}"  />-->
+                               <apex:outputPanel >
+                                   <apex:outputLabel value="{!activateFeatureLabel}" style="font-size:10px;font-weight:bold;"/>
+                                   <apex:outputLink value="{!hostUrl}" style="font-size:10px;font-weight:bold;color:blue;" target="_blank">Click</apex:outputlink>
+                               </apex:outputPanel>
+                               <apex:pageBlockSectionItem >
+                                   <apex:actionStatus id="status2" startText="Please wait....">
+                                       <apex:facet name="start"><img  src="/img/loading.gif" /></apex:facet>
+                                       <apex:facet name="stop"></apex:facet>
+                                   </apex:actionStatus>
+                                   <apex:commandButton value="One time sync mobile unsubscribe from inwise" action="{!doExecuteMobileUnsubscribe}" status="status2" reRender="block1"/>
+                               </apex:pageBlockSectionItem>
+                              <apex:pageBlockSectionItem >
+                                      <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Mobile_unsubscribe_contact_field__c.Label}"></apex:outputLabel>
+                                      <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Mobile_unsubscribe_contact_field__c}" >
+                                              <apex:selectOptions value="{!listOfSelectOptionFields_Contact}"/>
+                                      </apex:selectList>
+                              </apex:pageBlockSectionItem>
+                              <apex:pageBlockSectionItem >
+                                   <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Contact_Mobile_Search_Field__c.Label}"></apex:outputLabel>
+                                   <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Contact_Mobile_Search_Field__c}" >
+                                       <apex:selectOptions value="{!listOfSOFields_ContactMobileOptinOutField}"/>
+                                   </apex:selectList>
+                               </apex:pageBlockSectionItem>
+                             <apex:pageBlockSectionItem >
+                                      <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Mobile_unsubscribe_lead_field__c.Label}"></apex:outputLabel>
+                                      <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Mobile_unsubscribe_lead_field__c}" >
+                                              <apex:selectOptions value="{!listOfSelectOptionFields_Lead}"/>
+                                      </apex:selectList>
+                              </apex:pageBlockSectionItem>
+                               <apex:pageBlockSectionItem >
+                                   <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Lead_Mobile_Search_Field__c.Label}"></apex:outputLabel>
+                                   <apex:selectList size="1" value="{!objInwiseUtil.objInwiseSetting.Lead_Mobile_Search_Field__c}" >
+                                       <apex:selectOptions value="{!listOfSOFields_LeadMobileOptinOutField}"/>
+                                   </apex:selectList>
+                               </apex:pageBlockSectionItem>
+                               <apex:pageBlockSectionItem >
+                                   <apex:outputLabel value="{!$ObjectType.Settings__c.fields.Opt_in_Out_to_Salesforce_Mobile_Last_Run__c.Label}"></apex:outputLabel>
+                                   <apex:outputField value="{!objInwiseUtil.objInwiseSetting.Opt_in_Out_to_Salesforce_Mobile_Last_Run__c}" />
+                               </apex:pageBlockSectionItem>
+                           </apex:pageBlockSection> 
+                  </apex:pageBlock>        
+   </apex:form>
+  </div> 
+      <c:TagManager />
+              
+</apex:page>
