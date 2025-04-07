@@ -34,7 +34,7 @@
     </types>
     <types>
         <members>*</members>
-        <name>StaticResource</name>
+        <name>StaticResource</name> 
     </types>
     <version>63.0</version>
 </Package>

@@ -304,7 +304,11 @@ public with sharing class SendToInwiseController {
                 if(objCampaign.Campaign_Type__c == 'Mobile'){
                     //objWrapperResult = CreateMobileMessageLogon(listOfLogs);    
                     objWrapperResult = CreateMobileMessageJSON(listOfLogs);
-                }else{
+                }
+                else if (objCampaign.Campaign_Type__c == 'WhatsApp') {
+                    objWrapperResult = CreateWhatsAppMessageJSON(listOfLogs); // New method for WhatsApp
+                }
+                else{
                     //fixed Name:NameLengthExeceeded issue in cae of campaign name > 111
                     objWrapperResult= getSendIdCampaign(getCampaignName(),listOfLogs);
                 }
@@ -438,15 +442,15 @@ public with sharing class SendToInwiseController {
     public String getCreateSMSJSON(String campaignname){
         String s = '{';
         s += '"name": "'+ campaignname +'",';
-        s += '"body": "string",';
+        //s += '"body": "string",';
         s += '"charset": "unicode",';
         s += '"tags": [';
-        s += '"string"';
+        s += '"Salesforce"';
         s += '],';
         s += '"validity_minutes": 0,';
         s += '"sender": "'+ (objInwiseUtil.objInwiseAccount.SMS_Sender__c != NULL ? objInwiseUtil.objInwiseAccount.SMS_Sender__c : '') +'",';
         s += '"track_links": true,';
-        s += '"unsubscribed_text": "string",';
+        //s += '"unsubscribed_text": "string",';
         s += '"add_unsubscribe": true,';
         s += '"reply_to_unsubscribe": true';
         return s;
@@ -510,9 +514,7 @@ public with sharing class SendToInwiseController {
         sJson += '"from_name": "string",';
         sJson += '"charset": "utf-8",';
         sJson += '"content_type": "html",';
-        sJson += '"tags": [';
-        sJson +=  '"string"';
-        sJson +=  '],';
+        sJson += '"tags": ["SalesForce"],';
         sJson += '"google_analytics_campaign": "",';
         sJson += '"attachments_mapping": [';
         sJson += '0';
@@ -533,6 +535,79 @@ public with sharing class SendToInwiseController {
         sJson += '}';
         return sJson;
     }
+
+  public WrapperResult CreateWhatsAppMessageJSON(List<Logs__c> listOfLogs) {
+    WrapperResult objWrapperResult = new WrapperResult();
+    Http http = new Http();
+    HttpResponse res;
+    HttpRequest req;
+
+    try {
+        String endpoint = objInwiseUtil.apiUrl + '/rest/v1/campaigns/whatsapp';
+        req = objInwiseUtil.GetHTTPRequest('POST', 'application/json', endpoint);
+        req.setHeader('X-Api-Key', objInwiseUtil.inwiseAccountToken);
+        
+        // Generate JSON payload for WhatsApp
+        req.setBody(getCreateWhatsAppJSON(getCampaignName()));
+         //System.debug('APIsss Response: ' + res.getBody());
+          
+
+        if (!Test.isRunningTest()) {
+            res = http.send(req);
+            listOfLogs.add(inwiseHttpUtil.getHttpLogRecord(req, res, '/rest/v1/campaigns/whatsapp', 'SendToInwiseController', 'CreateWhatsAppMessageJSON'));
+            System.debug('listOfLogs: ' + listOfLogs);
+
+            System.debug('API Response: ' + res.getBody());
+            System.debug('Status Code: ' + res.getStatusCode());
+
+        } else {
+            String resBody = '{ "campaign_id": 12345, "status": "success" }';
+            res = inwiseTestDataFactory.getDumpHttpResponse(resBody, 'application/json');
+            System.debug('API Response2: ' + res.getBody());
+            System.debug('Status Code2: ' + res.getStatusCode());
+        }
+
+        if (res.getStatusCode() == 200) {
+            objWrapperResult.isSuccess = true;
+            objWrapperResult.msg = InwiseConstants.SYNC_MEMBER_SUCCESS;
+            
+            // Extract campaign_id from response
+            JSONParser parser = JSON.createParser(res.getBody());
+            while (parser.nextToken() != null) {
+                if (parser.getCurrentName() == 'campaign_id' && parser.getCurrentToken() == JSONToken.FIELD_NAME) {
+                    parser.nextToken();
+                    objWrapperResult.resultSendId = parser.getText() != NULL ? Integer.valueOf(parser.getText()) : 0;
+                    break;
+                }
+            }
+        } else {
+            objWrapperResult.isSuccess = false;
+            objWrapperResult.msg = res.getStatus();
+        }
+    } catch (Exception ex) {
+        String resBody = ex.getMessage();
+        res = inwiseTestDataFactory.getDumpHttpResponse(resBody, 'application/json');
+        listOfLogs.add(inwiseHttpUtil.getHttpLogRecord(req, res, '/rest/v1/campaigns/whatsapp', 'SendToInwiseController', 'CreateWhatsAppMessageJSON'));
+        objWrapperResult.isSuccess = false;
+        objWrapperResult.msg = resBody;
+    }
+    return objWrapperResult;
+}
+public String getCreateWhatsAppJSON(String campaignName) {
+    String s = '{';
+    s += '"name": "'+ campaignName +'",';
+    s += '"tags": ["SalesForce"],';
+   // s += '"sender": "'+ (objInwiseUtil.objInwiseAccount.WhatsApp_Sender__c != NULL ? objInwiseUtil.objInwiseAccount.WhatsApp_Sender__c : '') +'",';
+    s += '"validity_minutes": 0,';
+    s += '"charset": "Unicode",';
+    s += '"track_links": true,';
+    s += '"add_unsubscribe": true,';
+    s += '"reply_to_unsubscribe": true';
+    s += '}';
+    return s;
+}
+
+
 
     //in case of button click, call it only for that campaign
     public void  doClickMemberAction(boolean isNeedToScheduleNextHour, Id campaignId){
@@ -580,7 +655,7 @@ public with sharing class SendToInwiseController {
                 Schema.sObjectType.Campaign.fields.Sendid__c.isAccessible() &&
                 Schema.sObjectType.Campaign.fields.Campaign_Type__c.isAccessible()) {
 
-                listCampaignsToInsert = [SELECT Id,Name,Account__c,Sendid__c,Campaign_Type__c FROM Campaign where (Campaign_Type__c = 'Email' Or Campaign_Type__c = 'Mobile') AND Sendid__c != NULL AND CreatedDate = LAST_N_DAYS:30];
+                listCampaignsToInsert = [SELECT Id,Name,Account__c,Sendid__c,Campaign_Type__c FROM Campaign where (Campaign_Type__c = 'Email' Or Campaign_Type__c = 'Mobile' Or Campaign_Type__c = 'Whatsapp') AND Sendid__c != NULL AND CreatedDate = LAST_N_DAYS:30];
             }
         }else{
             if (Schema.sObjectType.Campaign.isAccessible() &&
@@ -590,7 +665,7 @@ public with sharing class SendToInwiseController {
                 Schema.sObjectType.Campaign.fields.Sendid__c.isAccessible() &&
                 Schema.sObjectType.Campaign.fields.Campaign_Type__c.isAccessible()) {
 
-                listCampaignsToInsert = [SELECT Id,Name,Account__c,Sendid__c,Campaign_Type__c FROM Campaign where (Campaign_Type__c = 'Email' Or Campaign_Type__c = 'Mobile') AND Sendid__c != NULL AND Id =:campaignId];
+                listCampaignsToInsert = [SELECT Id,Name,Account__c,Sendid__c,Campaign_Type__c FROM Campaign where (Campaign_Type__c = 'Email' Or Campaign_Type__c = 'Mobile' Or Campaign_Type__c = 'Whatsapp') AND Sendid__c != NULL AND Id =:campaignId];
             }
             isCalledByButtonClick = true;
         }
@@ -679,7 +754,11 @@ public with sharing class SendToInwiseController {
             String callType = '';
             if(objCampaign.Campaign_Type__c == 'Mobile'){
                 callType = 'sms';
-            }else{
+            }
+            else if (objCampaign.Campaign_Type__c == 'WhatsApp') {
+                callType = 'whatsapp';
+            }
+            else{
                 callType = 'email';
             }
             String endpoint ;// + sendId;

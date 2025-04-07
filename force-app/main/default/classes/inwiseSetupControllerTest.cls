@@ -120,7 +120,6 @@ private class inwiseSetupControllerTest {
         con.LastName = 'Contact';
         con.Email = 'inwise@inwisetest.com';
         con.HasOptedOutOfEmail = true;
-        con.MobilePhone = '4534553';
         insert con;
         
         Lead objLead = new Lead();

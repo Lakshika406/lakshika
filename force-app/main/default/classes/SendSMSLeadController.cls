@@ -83,11 +83,8 @@ public with sharing class SendSMSLeadController {
     public List<SelectOption> listOfSelectOptionRemoveNullFields(List<SelectOption> listofSO, Lead objLeadTemp ){
         List<SelectOption> listofSONew = new List<SelectOption>();
         if(!listofSO.isEmpty()){
-            // Get the map of populated fields for the Contact record
-            Map<String, Object> populatedFields = objLeadTemp.getPopulatedFieldsAsMap();
-
             for(SelectOption so : listofSO){
-                if(!String.isBlank(so.getValue()) && populatedFields.containsKey(so.getValue()) && objLeadTemp.get(so.getValue()) != NULL){
+                if(!String.isBlank(so.getValue()) && objLeadTemp.get(so.getValue()) != NULL){
                     listofSONew.add(so);
                 }
             }  

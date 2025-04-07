@@ -38,7 +38,6 @@ private class inwiseSendSMSControllerTest {
         con.FirstName = 'test';
         con.LastName = 'Contact';
         con.accountid = objAcc.Id;
-        //con.DoNotCall = true;
         insert con;
         
         Test.startTest();
