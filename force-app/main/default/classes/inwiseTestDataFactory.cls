@@ -97,6 +97,7 @@ public with sharing class inwiseTestDataFactory {
         HttpResponse res = new HttpResponse();
         res.setHeader('Content-Type', contentType);
         res.setBody(resBody);
+        System.debug('res body' +resBody);
         res.setStatusCode(200);
         res.setStatus('OK');
         return res;

@@ -16,45 +16,13 @@ global with sharing class inwiseAutomationTrigger {
     
     @InvocableMethod
     global static void inwiseAutomation(List<String> trigger_identifier) {
-        System.debug('==trigger_identifier='+trigger_identifier);
-        System.debug('==trigger_identifier=size='+trigger_identifier.size());
-        List<Error_Logs__c> listOfErrorLogs = new List<Error_Logs__c>();
-        if(!trigger_identifier.isEmpty()){
-            if(trigger_identifier.size() == 1){
-                try{
-                    List<Object> fieldList = (List<Object>)JSON.deserializeUntyped(trigger_identifier.get(0));
-                    Map<String, Object> data = (Map<String, Object>)fieldList.get(0);
+        List<Object> fieldList = (List<Object>)JSON.deserializeUntyped(trigger_identifier.get(0));
+        Map<String, Object> data = (Map<String, Object>)fieldList.get(0);
 
-                    String recordId = (String)data.get('RecordID');
-                    String triggeridentifier = (String)data.get('trigger_identifier');
-                    String accountId = data.containsKey('inwiseAccount') ? (String)data.get('inwiseAccount') : '';
-                    calloutmethod(triggeridentifier, recordId, accountId);
-                } catch(Exception e){
-                    system.debug('====ex=='+e.getMessage());
-                    listOfErrorLogs.add(inwiseHttpUtil.getErrorLogRecord(e.getMessage(), 'inwiseAutomationTrigger', 'inwiseAutomation'));
-                }
-            } else {
-                for(Integer i=0;i<trigger_identifier.size();i++){
-                    try{
-                        List<Object> fieldList = (List<Object>)JSON.deserializeUntyped(trigger_identifier.get(i));
-                        Map<String, Object> data = (Map<String, Object>)fieldList.get(0);
-        
-                        String recordId = (String)data.get('RecordID');
-                        String triggeridentifier = (String)data.get('trigger_identifier');
-                        String accountId = data.containsKey('inwiseAccount') ? (String)data.get('inwiseAccount') : '';
-                        calloutmethod(triggeridentifier, recordId, accountId);
-                    } catch(Exception e){
-                        system.debug('====ex=='+e.getMessage());
-                        listOfErrorLogs.add(inwiseHttpUtil.getErrorLogRecord(e.getMessage(), 'inwiseAutomationTrigger', 'inwiseAutomation'));
-                    }
-                }
-            }
-
-            if(!listOfErrorLogs.isEmpty()){
-                System.debug('=listOfErrorLogs=='+listOfErrorLogs);
-                insert listOfErrorLogs;
-            }
-        }
+        String recordId = (String)data.get('RecordID');
+        String triggeridentifier = (String)data.get('trigger_identifier');
+        String accountId = data.containsKey('inwiseAccount') ? (String)data.get('inwiseAccount') : '';
+        calloutmethod(triggeridentifier, recordId, accountId);
     }
     
     

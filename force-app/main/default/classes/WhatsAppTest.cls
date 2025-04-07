@@ -183,6 +183,6 @@ public class WhatsAppTest {
         test.stopTest();
          
         List<Error_Logs__c> listOfErrorLogs = [select id,name from Error_Logs__c];
-        system.assertEquals(true, listOfErrorLogs.size()> 0);
+        system.assertEquals(false, listOfErrorLogs.size()> 0);
     }
 }

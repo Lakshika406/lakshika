@@ -115,28 +115,10 @@ public with sharing class inwiseSetupController {
 
     private void fetchUserRecord() {
     	// TODO prepare query string for complex serarches & prevent injections
-        if(Schema.sObjectType.User.isAccessible() && Schema.sObjectType.User.fields.Name.isAccessible() && Schema.sObjectType.User.fields.isActive.isAccessible() &&
-           Schema.sObjectType.User.fields.UserType.isAccessible()) {
-            listOfUser = [SELECT Id, Name, isActive, UserType FROM User WHERE isActive = true AND UserType != 'Customer Community Login' LIMIT 49999]; 
+        if(Schema.sObjectType.User.isAccessible() && Schema.sObjectType.User.fields.Name.isAccessible()) {
+            listOfUser = [SELECT Id, Name FROM User LIMIT 49999]; 
         }  
     } 
-
-    @RemoteAction
-    public static List<User> searchUsers(String searchText) {
-        System.debug('==searchText='+searchText);
-        List<User> results = new List<User>();
-
-        if (String.isNotBlank(searchText) && searchText.length() >= 3) {
-            // TODO prepare query string for complex serarches & prevent injections
-            if(Schema.sObjectType.User.isAccessible() && Schema.sObjectType.User.fields.Name.isAccessible() && Schema.sObjectType.User.fields.isActive.isAccessible() &&
-               Schema.sObjectType.User.fields.UserType.isAccessible()) {
-
-                results = [SELECT Id, Name, isActive, UserType FROM User WHERE Name LIKE :('%' + searchText + '%') LIMIT 50];
-            }
-        }
-
-        return results;
-    }
 
     private void fetchSelectUser(String currentInwiseAccRecordId) {
     	// TODO prepare query string for complex serarches & prevent injections
@@ -147,10 +129,8 @@ public with sharing class inwiseSetupController {
                 listOfAccMap.add(accMapObj.User__c);
             }
         }
-        System.debug('==listOfAccMap='+listOfAccMap);
         if(Schema.sObjectType.User.isAccessible() && Schema.sObjectType.User.fields.Name.isAccessible() ){
             listOfSelectedUser = [SELECT Id, Name FROM User WHERE Id =: listOfAccMap LIMIT 49999];
-            System.debug('==listOfSelectedUser='+listOfSelectedUser);
         }  
     } 
 
@@ -546,7 +526,6 @@ public with sharing class inwiseSetupController {
             if(String.isNotBlank(selectUserIds) && String.isNotEmpty(selectUserIds)){
                 listOfSelectUserId = selectUserIds.split(',');
             }
-            System.debug('listOfSelectUserId::-->>' + listOfSelectUserId);
             for(String lsu : listOfSelectUserId) {
                 Account_SalesforceUser_Mapping__c accSalesforceUseObj = new Account_SalesforceUser_Mapping__c();
                 if(Schema.sObjectType.Account_SalesforceUser_Mapping__c.fields.Account__c.isCreateable()){

@@ -56,10 +56,10 @@ private class SendSMSLeadControllerTest {
         List<SelectOption> listofselectoptionNumber =  objController.listOfSelectOptionPhoneNumbers;
         System.debug('listofselectoptionNumber-->>' +listofselectoptionNumber);
         System.assertEquals(objController.selectedNumber,listofselectoptionNumber.get(0).getValue());
-        objController.selectedLeadField = objController.listOfSelectOptionFields_Lead[0].getValue(); 
+        objController.selectedLeadField = objController.listOfSelectOptionFields_Lead[5].getValue(); 
         List<SelectOption> listofselectoption =  objController.listOfSelectOptionFields_Lead;
         System.debug('listpfselectoptions-->>' +listofselectoption);
-        System.assertEquals(objController.selectedLeadField,listofselectoption.get(0).getValue());
+        System.assertEquals(objController.selectedLeadField,listofselectoption.get(5).getValue());
         objController.selectedLandingPage = objController.listOfSelectOptionLandingPages[1].getValue();   
         //System.assertEquals(objController.selectedLandingPage,'http://sf2.inwise.net/Page_02-11-2017_1');
          objController.messageBody='test body';   
