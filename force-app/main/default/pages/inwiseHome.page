@@ -107,7 +107,7 @@
                 $(document).ready(function(){
                     var htmlElement =  '<div data-step="1" data-position="right" positionPrecedence="bottom" id="spaninwiseFeature" style="width:140px;"> </div> ';
                     $(".pageDescription").wrap(htmlElement);
-                    $("#spaninwiseFeature").attr('data-intro','{!$Label.inwise__StartTour_inwise_welcomePage}');
+                    $("#spaninwiseFeature").attr('data-intro','{!$Label.StartTour_inwise_welcomePage}');
             
                     if({!objInwiseUtil.objInwiseSetting.Overlay_Help__c}){
                             startTour(true);

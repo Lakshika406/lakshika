@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Toggle_inwise_Opt_in_Opt_out_Email__c</fullName>
+    <defaultValue>false</defaultValue>
+    <label>(depr)Toggle inwise Opt-in/Opt-out Email</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WebLink xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Conversation_View</fullName>
+    <availability>online</availability>
+    <displayType>massActionButton</displayType>
+    <linkType>javascript</linkType>
+    <masterLabel>Conversation View</masterLabel>
+    <openType>onClickJavaScript</openType>
+    <protected>false</protected>
+    <requireRowSelection>false</requireRowSelection>
+    <url>{!REQUIRESCRIPT(&apos;/soap/ajax/26.0/connection.js&apos;)}
+    var LeadId = &quot;{!Lead.Id}&quot;;
+    var Contactid = &quot;{!Contact.Id}&quot;;
+
+    if(LeadId !=&apos;&apos;){
+window.location=&quot;/apex/ConversationViewPage?id={!Lead.Id}&quot;;
+
+    }
+    if(Contactid !=&apos;&apos;){
+  window.location=&quot;/apex/ConversationViewPage?id={!Contact.Id }&quot;
+}</url>
+</WebLink>

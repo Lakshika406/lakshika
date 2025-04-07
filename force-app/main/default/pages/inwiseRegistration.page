@@ -6,7 +6,7 @@
     /*$(document).ready(function(){
             var htmlElement =  '<div data-step="1" data-position="right"  id="inwiseStep1" style="width:240px;"> </div> ';
             $($(".mainTitle")[0]).wrap(htmlElement);
-            $("#inwiseStep1").attr('data-intro','{!$Label.inwise__StartTour_inwiseSetup_1}');  
+            $("#inwiseStep1").attr('data-intro','{!$Label.StartTour_inwiseSetup_1}');  
         }); */
   </script> 
     <!--<div class="{!objinwiseLtngConstants.slds}">

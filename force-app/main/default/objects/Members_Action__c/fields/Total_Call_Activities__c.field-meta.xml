@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Total_Call_Activities__c</fullName>
+    <label>Total Call Activities</label>
+    <summaryFilterItems>
+        <field>Rest_API_Call__c.Call_Type__c</field>
+        <operation>equals</operation>
+        <value>Activities</value>
+    </summaryFilterItems>
+    <summaryForeignKey>Rest_API_Call__c.Members_Action__c</summaryForeignKey>
+    <summaryOperation>count</summaryOperation>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>

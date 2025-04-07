@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Total_Memerbs_Count_RollUp__c</fullName>
+    <label>Total Memerbs Count (Roll-Up)</label>
+    <summaryForeignKey>Sync_Members__c.Sync_Master__c</summaryForeignKey>
+    <summaryOperation>count</summaryOperation>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>

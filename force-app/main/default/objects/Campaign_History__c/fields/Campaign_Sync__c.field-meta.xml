@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Campaign_Sync__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Campaign Sync</label>
+    <referenceTo>Campaign</referenceTo>
+    <relationshipLabel>inwise Campaign History</relationshipLabel>
+    <relationshipName>inwise_Campaign_Histories</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sync__c</fullName>
+    <label>inwise Sync</label>
+    <referenceTo>Sync__c</referenceTo>
+    <relationshipLabel>inwise Report Lookup Mapping</relationshipLabel>
+    <relationshipName>inwise_Report_Lookup_Mapping</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

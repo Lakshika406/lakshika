@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WebLink xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Turn_On_Off_Track_Log</fullName>
+    <availability>online</availability>
+    <displayType>massActionButton</displayType>
+    <linkType>javascript</linkType>
+    <masterLabel>Turn On/Off Track Log</masterLabel>
+    <openType>onClickJavaScript</openType>
+    <protected>false</protected>
+    <requireRowSelection>true</requireRowSelection>
+    <url>{!requirescript(&quot;/soap/ajax/29.0/connection.js&quot;)}
+{!requirescript(&quot;/soap/ajax/29.0/apex.js&quot;)}
+
+var result = sforce.apex.execute(&quot;inwiseGlobalAction&quot;,&quot;doTurnOnOffTrackLog&quot;,{});
+var tracking =  (result == &apos;true&apos;);
+
+if(tracking){
+  alert(&quot;Tracking is enabled&quot;);
+}else{
+  alert(&quot;Tracking is disabled&quot;); 
+}</url>
+</WebLink>

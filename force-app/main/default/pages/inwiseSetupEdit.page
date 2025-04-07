@@ -30,85 +30,31 @@
             $('.js-example-basic-multiple').select2();
         });
 
-        // function onSave(){
-        //     var selectedUserArray = [];
-        //     for(var option of document.getElementById('multiSelectId').options) { 
-        //         if (option.selected) {
-        //             selectedUserArray.push(option.value);
-        //         }
-        //     }
-        //     var selectedUserInStr = selectedUserArray.toString();
-        //     passSelectedUser(selectedUserInStr); 
-        // }
-
-        // On Save button click: display selected users (or pass them to Apex)
-        function onSave() {
-            var selectedUsers = $('#userSearchSelect').select2('data');
-            console.log('==selectedUsers='+selectedUsers);
-
-            if (selectedUsers.length === 0) {
-                alert('No users selected.');
-                return;
+        function onSave(){
+            var selectedUserArray = [];
+            for(var option of document.getElementById('multiSelectId').options) { 
+                if (option.selected) {
+                    selectedUserArray.push(option.value);
+                }
             }
-
-            var userIds = selectedUsers.map(function(user) {
-                return user.id;
-            });
-            console.log('==userIds='+userIds);
-            passSelectedUser(userIds.toString());   
-
+            var selectedUserInStr = selectedUserArray.toString();
+            passSelectedUser(selectedUserInStr); 
         }
 
-
-        $(document).ready(function() {
-
-            // Initialize Select2 on our select box
-            $('#userSearchSelect').select2({
-                placeholder: 'Search Salesforce Users',
-                minimumInputLength: 3,
-                multiple: true,
-                ajax: {
-                    transport: function(params, success, failure) {
-                        Visualforce.remoting.Manager.invokeAction(
-                            '{!$RemoteAction.inwiseSetupController.searchUsers}',
-                            params.data.q,
-                            function(result, event) {
-                                if (event.status) {
-                                    var data = $.map(result, function(user) {
-                                        return {
-                                            id: user.Id,
-                                            text: user.Name
-                                        };
-                                    });
-                                    success({ results: data });
-                                } else {
-                                    failure(event.message);
-                                }
-                            },
-                            { escape: true }
-                        );
-                    },
-                    delay: 250
-                }
+        window.onload=function() {
+            
+            var listOfUser = []; 
+            <apex:repeat value="{!listOfSelectedUser}" var="user"> 
+                listOfUser.push('{!user}'); 
+            </apex:repeat> 
+            
+            var s2 = $("#multiSelectId").select2({
+                placeholder: "Choose Salesforce logins",
+                tags: true
             });
-        });
-
-
-       // window.onload=function() {
-            
-            // var listOfUser = []; 
-            // <apex:repeat value="{!listOfSelectedUser}" var="user"> 
-            //     listOfUser.push('{!user}'); 
-            // </apex:repeat> 
-            
-            // var s2 = $("#userSearchSelect").select2({
-            //     placeholder: "Choose Salesforce logins",
-            //     tags: true
-            // });
   
-            // s2.val(listOfUser).trigger("change"); 
-
-        //};
+            s2.val(listOfUser).trigger("change"); 
+        };
     </script>
 
     <div class="{!objinwiseLtngConstants.slds}">  
@@ -152,27 +98,13 @@
                 <apex:pageBlockSection id="sectionDefault1" columns="1" >
                     <apex:pageBlockSectionItem >
                         <apex:outputLabel value="Salesforce logins" /> 
-                        <!-- Multi-select Input -->
-                        <!-- <select id="userSearchSelect" multiple="multiple" style="width: 400px;">
-                        </select> -->
-
-                        <!-- Multi-select Input -->
                         <apex:outputPanel >
-                            <select id="userSearchSelect" multiple="multiple" style="width: 400px;">
-                                <!-- Preload existing users as options -->
-                                <apex:repeat value="{!listOfSelectedUser}" var="user">
-                                    <option value="{!user.Id}" selected="selected">{!user.Name}</option>
-                                </apex:repeat>
-                            </select>
-                        </apex:outputPanel>
-
-                        <!-- <apex:outputPanel >
                             <select class="js-example-basic-multiple" name="states[]"  multiple="multiple" id="multiSelectId" >
                                 <apex:repeat value="{!listOfUser}" var="user">
                                     <option value="{!user.Id}" >{!user.Name}</option>
                                 </apex:repeat>
                             </select>
-                        </apex:outputPanel> -->
+                        </apex:outputPanel>
                     </apex:pageBlockSectionItem>
                     <apex:pageBlockSectionItem >
                         <apex:outputLabel value="Account Id" />
