@@ -13,7 +13,7 @@ Date            Version     Developer                  Comments
 30/01/2023      1.0.3       NLINEAXIS(K. Goutam)       Modified:- Added deprecated on class & removed global from phoneNumber variable. 
 
 /******************************************************************************************/
-@deprecated
+//@deprecated
 global class TransactionalHelper{
     static string phoneNumber;
     @InvocableMethod(label='Send' description='Method to use send sms')

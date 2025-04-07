@@ -50,9 +50,9 @@ public with sharing class inwiseSendSMSController {
         if(!listOfContact.isEmpty()){
             objContact = listOfContact.get(0);
             listOfSelectOptionFields_Contact = inwiseUtil.getFieldsForQueryFilter(InwiseConstants.SOBJECT_CONTACT, inwiseScheduleSyncObject.setOfAcceptableTypeForSOQL, true);
-           
             getContactPhoneNumbers(listOfSelectOptionFields_Contact,objContact.Id);
             listOfSelectOptionFields_Contact = listOfSelectOptionRemoveNullFields(listOfSelectOptionFields_Contact, objContact);
+            
             getTemplatesList();
             getLandingPagesList();
         }
@@ -80,15 +80,8 @@ public with sharing class inwiseSendSMSController {
         
         List<SelectOption> listofSONew = new List<SelectOption>();
         if(!listofSO.isEmpty()){
-
-            // Get the map of populated fields for the Contact record
-            Map<String, Object> populatedFields = objContactTemp.getPopulatedFieldsAsMap();
-
             for(SelectOption so : listofSO){
-       
-                //if(!String.isBlank(so.getValue()) && objContactTemp.get(so.getValue()) != NULL){
-                if(!String.isBlank(so.getValue()) && populatedFields.containsKey(so.getValue()) && objContactTemp.get(so.getValue()) != NULL){ 
-                    System.debug('=so@@@='+so);
+                if(!String.isBlank(so.getValue()) && objContactTemp.get(so.getValue()) != NULL){
                     listofSONew.add(so);
                 }
             }  

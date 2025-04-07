@@ -162,15 +162,8 @@ public with sharing class inwiseSendSMSLtngController {
     public static List<inwiseSendSMSLtngController.SelectOption> listOfSelectOptionRemoveNullFields(List<inwiseSendSMSLtngController.SelectOption> listofSO, Contact objContactTemp ){
         List<inwiseSendSMSLtngController.SelectOption> listofSONew = new List<inwiseSendSMSLtngController.SelectOption>();
         if(!listofSO.isEmpty()){
-            // Get the map of populated fields for the Contact record
-            Map<String, Object> populatedFields = objContactTemp.getPopulatedFieldsAsMap();
-            
-
             for(SelectOption so:listofSO){
-                System.debug('=so.Value='+so.Value);
-                //System.debug('=so.getValue()='+so.getValue());
-                //if(!String.isBlank(so.Value) && objContactTemp.get(so.Value) != NULL){
-                if(!String.isBlank(so.Value) && populatedFields.containsKey(so.Value) && objContactTemp.get(so.Value) != NULL){
+                if(!String.isBlank(so.Value) && objContactTemp.get(so.Value) != NULL){
                     listofSONew.add(so);
                 }
             }  

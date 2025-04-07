@@ -127,7 +127,6 @@ global with sharing class BatchSyncMemberToInwiseReports implements Database.Bat
         ApexPages.StandardSetController objStdSetController;
       
         List<Report> reportList = [SELECT Id,DeveloperName FROM Report WHERE DeveloperName =: sReportId WITH SECURITY_ENFORCED];
-
         if(!reportList.isEmpty()){
 
             String columnName = '';

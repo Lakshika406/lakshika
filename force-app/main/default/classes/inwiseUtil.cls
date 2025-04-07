@@ -59,8 +59,6 @@ public with sharing class inwiseUtil {
                 listOfInwiseAccount = [SELECT Id,Name,Password__c,User_Name__c,Default_Campaign_Type__c,ListEmailFeedBackActionMaxId__c, ListEmailSentMessageMaxId__c,SMS_Sender__c,Country__c,Trim_Leading_Zero__c FROM Account__c WHERE Id = :acc.Id WITH SECURITY_ENFORCED limit 1]; 
             }
 
-            System.debug('=listOfInwiseAccount='+listOfInwiseAccount);
-
             if(!listOfInwiseAccount.isEmpty()){
                 objInwiseAccount = getFirstIndexRec(listOfInwiseAccount);//listOfInwiseAccount.get(0); 
                 //inwiseAccountToken = decryptToken(objInwiseAccount.Token__c);
@@ -132,9 +130,6 @@ public with sharing class inwiseUtil {
         // if(objInwiseSetting == NULL || objInwiseAccount == NULL || objInwiseAccount.Token__c == NULL){
         //        isCredentialExists = false;
         // }
-        System.debug('=objInwiseSetting='+objInwiseSetting);
-        System.debug('=objInwiseAccount='+objInwiseAccount);
-        System.debug('=inwiseAccountToken='+inwiseAccountToken);
 
         //if(objInwiseSetting == NULL || objInwiseAccount == NULL || objInwiseTokenSetting == NULL){ 
         if(objInwiseSetting == NULL || objInwiseAccount == NULL || inwiseAccountToken == NULL){
@@ -262,9 +257,7 @@ public with sharing class inwiseUtil {
         Map<String, SelectOption> mapOfSelectOption = new Map<String, SelectOption>();
         if(fieldMap != null && !fieldMap.isEmpty()){
             for(Schema.SObjectField sfield : fieldMap.Values()){
-                //System.debug('==sfield='+sfield);
                 schema.describefieldresult dfield = sfield.getDescribe();
-                //System.debug('==dfield='+dfield);
                 if(dfield.isFilterable() && setOfAcceptableTypes.contains(String.valueOf(dfield.getType()).toUpperCase()) && !setOfStringExcludeFields.contains(dfield.getname())){
                     if(isformapping){
                         so = new SelectOption(dfield.getname(),dfield.getLabel () + ' (' + String.valueOf(dfield.getType()).toLowerCase() +')');
@@ -290,8 +283,6 @@ public with sharing class inwiseUtil {
         listOfFields.addAll(mapOfSelectOption.keySet());
         listOfFields.sort();
         for(String s : listOfFields){
-            //System.debug('ss='+s);
-            //System.debug('mapOfSelectOption.get(s)='+mapOfSelectOption.get(s));
             listOfSo.add(mapOfSelectOption.get(s));
         }
         

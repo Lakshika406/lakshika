@@ -4,7 +4,7 @@
 *Updated On:  
 *Purpose :    Test Code coverage for BatchSyncMemberToInwiseReports
 /******************************************************************************************/
-@isTest(SeeAllData=true)
+@isTest
 private class BatchSyncMemberToInwiseReportsTest {
 
     static testMethod void batchSyncMemberToInwiseReportsTest1() {
@@ -82,12 +82,6 @@ private class BatchSyncMemberToInwiseReportsTest {
         objLead.Status = 'Open - Not Contacted';        
         objLead.Company = 'inwise';
         insert ObjLead;
-
-        List<Report> reportList = [SELECT Id,DeveloperName FROM Report WHERE DeveloperName =: objSync.Contact_Report__c];
-        System.debug('reportList='+reportList);
-
-        List<Report> reportLis111 = [SELECT Id,DeveloperName FROM Report];
-        System.debug('reportLis111='+reportLis111);
         
         Test.startTest();
         BatchSyncMemberToInwiseReports obj = new BatchSyncMemberToInwiseReports(); 
@@ -132,8 +126,8 @@ private class BatchSyncMemberToInwiseReportsTest {
         Sync__c objSync = new Sync__c();
         objSync.name = 'leadSync';
         objSync.Group_Name__c = 'campaign5';
-        objSync.Contact_Report__c =  reportName;
-        objSync.Lead_Report__c =  reportName;
+        objSync.Contact_Report__c = 'unfiled$public/' + reportName;
+        objSync.Lead_Report__c = 'unfiled$public/' + reportName;
         insert objSync;
 
         Report_Lookup_Mapping__c reportLookupObj = inwiseTestDataFactory.getInwiseReportLookupMapping(act1,objSync,'Contact');
