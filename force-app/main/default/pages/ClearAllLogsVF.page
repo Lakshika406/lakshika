@@ -1,0 +1,9 @@
+<apex:page standardController="Landing_Sync_History__c" recordSetVar="Landing_Sync_History__c" extensions="ClearAllLogVFController" >
+    <apex:form >
+    <apex:actionFunction name="callApexMethod" action="{!doClearLandingSyncHistory}" /></apex:form>
+    <script>
+     	alert("All Landing Sync Logs have been deleted");
+        //window.location.reload();
+        window.history.back();
+    </script>
+</apex:page>

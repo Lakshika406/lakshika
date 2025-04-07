@@ -1,0 +1,20 @@
+.slds a {
+	color: black;
+}
+.slds a:focus{
+  outline:none;
+}
+.introjs-tooltip {
+  max-width: 450px;
+  width: 450px;
+}
+
+.introjs-tooltipbuttons {
+  text-align: center;
+}
+/* to increase space in between lines */
+.introjs-tooltip {
+	  font-family: Arial;
+	  font-size: 15px;
+	  line-height: 18px;
+}

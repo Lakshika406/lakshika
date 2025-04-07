@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Members_Action__c</fullName>
+    <deprecated>false</deprecated>
+    <label>inwise Members Action</label>
+    <referenceTo>Members_Action__c</referenceTo>
+    <relationshipLabel>inwise Rest API Call</relationshipLabel>
+    <relationshipName>inwise_Rest_API_Call</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>true</reparentableMasterDetail>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

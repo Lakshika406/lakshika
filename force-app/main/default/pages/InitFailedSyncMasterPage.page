@@ -1,0 +1,34 @@
+<apex:page extensions="inwiseGlobalAction" standardController="Sync_Master__c">
+    <apex:form >
+        <script>
+            function initFailedSyncMaster() {
+                var syncMasterId = '{!Sync_Master__c.Id}';
+                //alert(syncMasterId);
+                if (confirm('Are you sure you want to Init Failed Sync Master records ?')) {
+                
+                    // Call the Apex method using Visualforce remoting
+                    Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.inwiseGlobalAction.remoteinitFailedSyncMaster}',syncMasterId,
+                        function (result, event) {
+                            if (event.status) {
+                                alert(result); // Show the result in an alert box
+                                window.history.back();
+                                //window.location.reload(); // Reload the page
+                            } else {
+                                alert('Error: ' + event.message); // Handle errors
+                                window.history.back();
+                            }
+                        }
+                    );
+                } else {
+                    window.history.back();
+                }
+            }
+
+            // Trigger the delete action on page load
+            window.onload = function() {
+                initFailedSyncMaster();
+            };
+        </script>
+    </apex:form>
+</apex:page>

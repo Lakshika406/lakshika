@@ -1,0 +1,162 @@
+<apex:page showHeader="true" sidebar="true" id="page1" tabStyle="Inwise_Setup__tab" standardController="Landing_Sync__c" extensions="inwiseScheduleLandingSyncController" docType="html-5.0">
+    <c:inwiseUtilHeader />
+    <!-- <script type = "text/javascript" src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script> -->
+    <script src="{!URLFOR($Resource.Jquery_Resources, 'Jquery_Resources/V2.1.3.jquery.min.js')}" type="text/javascript"></script>
+
+    
+    <script type="text/javascript">
+        $(document).ready(function(){
+            jsLoadLandingPages(true);
+        });
+        
+        function show(radio){
+            selectedValue= radio.value;
+            if(radio.checked == true && radio.value == 'Landing Page'){
+                document.getElementsByClassName("radioBtnPopupPage")[0].children[0].children[0].children[0].children[0].checked = false;
+            }else if(radio.checked == true && radio.value == 'Popup'){
+                document.getElementsByClassName("radioBtnLadingPage")[0].children[0].children[0].children[0].children[0].checked = false;
+            }
+            jsgetLandingPagesList(selectedValue);
+        }
+    </script>
+
+    <style type="text/css">
+        .data2Col fieldset {
+            padding: 0;
+        }
+        th.labelCol.vfLabelColTextWrap {
+            line-height: 18px;
+        }
+        
+    </style>
+  
+
+    <div class="{!objinwiseLtngConstants.slds}"> 
+        <apex:form >
+            <!-- Include CSRF token as a hidden input field -->
+            <input type="hidden" name="csrfToken" value="{!csrfToken}" />
+
+            <apex:actionFunction Name="jsgetLandingPagesList" action="{!getLandingPagesList}" immediate="true"  rerender="block1,msg" status="statusloading">
+                <apex:param name="send" value="" assignTo="{!isLandingPage}"/>
+            </apex:actionFunction>
+            <apex:actionFunction name="jsLoadLandingPages" action="{!OnLoadCheckLandingPageAndPopup}" immediate="true"  rerender="block1,msg" status="statusloading">
+                <apex:param name="csrfToken" value="{!csrfToken}" assignTo="{!csrfToken}" />
+            </apex:actionFunction>
+            
+            <apex:sectionHeader title="Steps" subtitle="Sync leads from inwise forms"  id="sectionheader1"></apex:sectionHeader>
+            <apex:pageMessages id="msg"/>
+            
+            <apex:pageBlock id="block1" title="{!objWrapperSync.currentStep}"> 
+                <apex:pageBlockButtons location="bottom">
+                    <apex:commandButton value="Previous Step" action="{!doPrevStep}" rendered="{!objWrapperSync.Step2}" reRender="block1,msg" status="statusloading"  styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                    <apex:commandButton value="{!IF(objWrapperSync.Step2,'Save','Next Step')}" action="{!nextStep}" rendered="{!objWrapperSync.isCanProceed}" reRender="block1, msg" status="statusloading" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                    <apex:commandButton value="Cancel" action="{!doCancel}"  styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                    <apex:actionStatus id="statusloading">
+                        <apex:facet name="start"><img src="/img/loading.gif" /></apex:facet>
+                    </apex:actionStatus>
+                </apex:pageBlockButtons>
+                
+                <apex:pageBlockSection columns="1" rendered="{!AND(objWrapperSync.isCanProceed,objWrapperSync.Step1)}" >
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Sync Name"></apex:outputLabel>
+                        <!--    <apex:inputField value="{!objWrapperSync.objSync.Name}"  required="true" styleClass="{!objinwiseLtngConstants.sldsInput}" />  -->
+                        <apex:inputField value="{!objWrapperSync.objSync.Name}"  styleClass="{!objinwiseLtngConstants.sldsInput}" style="width: 29%"/> 
+                    </apex:pageBlockSectionItem>
+                
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Select Account" />
+                        <apex:outputPanel >
+                            <apex:outputLabel value="{!objWrapperSync.selectedAccountName}" rendered="{!IF($CurrentPage.parameters.Id != null, true, false)}" />
+                            <apex:selectList size="1"  value="{!objWrapperSync.selectedAccount}" styleClass="{!objinwiseLtngConstants.sldsInput}" rendered="{!IF($CurrentPage.parameters.Id == null, true, false)}" style="width: 30%">
+                                <apex:actionSupport event="onchange" reRender="pnlGroups,msg" action="{!getLandingPagesListOnAccChange}" status="statusloading"></apex:actionSupport>
+                                <apex:selectOptions value="{!listOfSelectOptionAccounts}" />
+                            </apex:selectList>
+                        </apex:outputPanel>
+                        
+                    </apex:pageBlockSectionItem> 
+
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Form type" id="formtypeId"/> 
+                        <apex:outputPanel >
+                            <apex:selectRadio styleClass="radioBtnLadingPage" value="{!isLandingPage}" onChange="show(this);" id="radioIdLadingPage" >  
+                                <apex:selectOption itemValue="Landing Page" itemlabel="Landing Page" itemDisabled="{!isLandingDisabled}"/>
+                            </apex:selectRadio>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputPanel ></apex:outputPanel>
+                        <apex:outputPanel >
+                            <apex:selectRadio styleClass="radioBtnPopupPage" value="{!isLandingPage}" onChange="show(this);" id="radioIdPopupPage" >  
+                                <apex:selectOption itemValue="Popup" itemlabel="Popup" itemDisabled="{!isPopupDisabled}"/>
+                            </apex:selectRadio>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>                         
+                
+                    <apex:pageBlockSectionItem >
+                        <!--<apex:outputLabel value="Select Landing Page" />-->
+                        <apex:outputLabel value="Select Form" />
+                        <apex:outputPanel id="pnlGroups">
+                            <apex:outputLabel value="{!objWrapperSync.objSync.Landing_Page_Name__c}" rendered="{!IF($CurrentPage.parameters.Id != null, true, false)}" />
+                            <apex:selectList size="1"  value="{!objWrapperSync.objSync.Landing_Page_Id__c}" styleClass="{!objinwiseLtngConstants.sldsInput}" rendered="{!IF($CurrentPage.parameters.Id == null, true, false)}" style="width: 30%">
+                                <apex:selectOptions value="{!listOfSelectOptionLandingPages}" />
+                            </apex:selectList>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem> 
+                </apex:pageBlockSection>    
+                
+                <apex:pageBlockSection columns="1" rendered="{!AND(objWrapperSync.isCanProceed,objWrapperSync.Step2)}" >   
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Sync Name"></apex:outputLabel>
+                        <apex:outputField value="{!objWrapperSync.objSync.Name}"  /> 
+                    </apex:pageBlockSectionItem>
+                    
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Selected {!isLandingPage}" />
+                        <apex:outputLabel value="{!objWrapperSync.objSync.Landing_Page_Name__c}" />
+                    </apex:pageBlockSectionItem>
+                    
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Object" />
+                        <apex:outputPanel >
+                            <span style="vertical-align: top;">Lead</span>&nbsp;
+                            <apex:inputCheckbox value="{!objWrapperSync.objSync.Leads__c}" disabled="true"></apex:inputCheckbox>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>   
+                </apex:pageBlockSection>
+                
+                <apex:outputPanel id="pnlLead">
+                    <apex:pageBlockSection rendered="{!AND(objWrapperSync.isCanProceed,objWrapperSync.Step2)}" title="Mapping with Lead" columns="1"> 
+                        <apex:pageblocktable value="{!objWrapperSync.listOfLandingSyncMapping}" var="l" styleClass="{!objinwiseLtngConstants.sldsTableSldsTableBorderedSldsTableStriped}" >
+                            <apex:column > 
+                                <apex:facet name="header">Landing Page Fields</apex:facet>
+                                <apex:outputlabel value="{!l.inwise_Field__c}" style="font-weight:bold;" />
+                            </apex:column>
+                            <!--               <apex:column > 
+                            <apex:facet name="header">Landing Page Fields Id</apex:facet>
+                            <apex:outputlabel value="{!l.inwise_FieldId__c}" style="font-weight:bold;" />
+                            </apex:column> -->
+                            <apex:column rendered="{!objWrapperSync.objSync.Leads__c}">
+                                <apex:facet name="header">Lead Fields</apex:facet>
+                                <apex:selectList size="1" value="{!l.Salesforce_Field__c}">
+                                    <apex:selectOptions value="{!listOfSelectOptionFields_Lead}"/>
+                                </apex:selectList>
+                            </apex:column>
+                        </apex:pageblocktable>                   
+                    </apex:pageBlockSection> 
+                </apex:outputPanel>
+            </apex:pageBlock>
+            
+            <apex:outputPanel rendered="{!IF(objinwiseLtngConstants.slds == NULL, false, true)}">
+                <style>
+                    .apexp .bPageBlock.apexDefaultPageBlock .pbBody .pbSubheader {
+                        background-color: rgb(248, 248, 248);
+                        border-top: 0 none;
+                        color: black;
+                    }
+                    
+                </style>
+            </apex:outputPanel>  
+        </apex:form>
+    </div>
+    <c:TagManager />
+</apex:page>

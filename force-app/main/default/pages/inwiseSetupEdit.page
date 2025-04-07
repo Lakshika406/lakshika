@@ -1,0 +1,201 @@
+<apex:page standardController="Account__c" id="page1" extensions="inwiseSetupController" tabStyle="Inwise_Setup__tab" docType="html-5.0"  sidebar="true">
+    <c:inwiseUtilHeader />
+
+   
+    <script src="{!URLFOR($Resource.Cdn_Jsdelivr_Resources, 'Cdn_Jsdelivr_Resources/select2.min.js')}" type="text/javascript"></script>
+    <link rel="stylesheet" href="{!URLFOR($Resource.Cdn_Jsdelivr_Resources, 'Cdn_Jsdelivr_Resources/select2.min.css')}" type="text/css" /> 
+    
+    <style type="text/css">
+        .select2-selection--multiple {
+            width: 100% !important;   
+        }
+        .select2-container {
+            width: 78% !important; 
+            max-width: 78% !important; 
+        }
+    </style>
+     
+    <script>
+        $(document).ready(function(){
+            var htmlElement2 =  '<div data-step="2" data-position="right"  id="inwiseStep2" style="width:220px;"> </div> ';
+            $($(".mainTitle")[1]).wrap(htmlElement2);
+            $("#inwiseStep2").attr('data-intro','{!$Label.StartTour_inwiseSetup_2}');  
+         var overlayHelpValue =   "{!JSENCODE(IF(objInwiseUtil.objInwiseSetting.Overlay_Help__c, 'true', 'false'))}";
+
+            if(!overlayHelpValue){
+                startTour(true);
+            }
+        });
+        $(document).ready(function() {
+            $('.js-example-basic-multiple').select2();
+        });
+
+        // function onSave(){
+        //     var selectedUserArray = [];
+        //     for(var option of document.getElementById('multiSelectId').options) { 
+        //         if (option.selected) {
+        //             selectedUserArray.push(option.value);
+        //         }
+        //     }
+        //     var selectedUserInStr = selectedUserArray.toString();
+        //     passSelectedUser(selectedUserInStr); 
+        // }
+
+        // On Save button click: display selected users (or pass them to Apex)
+        function onSave() {
+            var selectedUsers = $('#userSearchSelect').select2('data');
+            console.log('==selectedUsers='+selectedUsers);
+
+            if (selectedUsers.length === 0) {
+                alert('No users selected.');
+                return;
+            }
+
+            var userIds = selectedUsers.map(function(user) {
+                return user.id;
+            });
+            console.log('==userIds='+userIds);
+            passSelectedUser(userIds.toString());   
+
+        }
+
+
+        $(document).ready(function() {
+
+            // Initialize Select2 on our select box
+            $('#userSearchSelect').select2({
+                placeholder: 'Search Salesforce Users',
+                minimumInputLength: 3,
+                multiple: true,
+                ajax: {
+                    transport: function(params, success, failure) {
+                        Visualforce.remoting.Manager.invokeAction(
+                            '{!$RemoteAction.inwiseSetupController.searchUsers}',
+                            params.data.q,
+                            function(result, event) {
+                                if (event.status) {
+                                    var data = $.map(result, function(user) {
+                                        return {
+                                            id: user.Id,
+                                            text: user.Name
+                                        };
+                                    });
+                                    success({ results: data });
+                                } else {
+                                    failure(event.message);
+                                }
+                            },
+                            { escape: true }
+                        );
+                    },
+                    delay: 250
+                }
+            });
+        });
+
+
+       // window.onload=function() {
+            
+            // var listOfUser = []; 
+            // <apex:repeat value="{!listOfSelectedUser}" var="user"> 
+            //     listOfUser.push('{!user}'); 
+            // </apex:repeat> 
+            
+            // var s2 = $("#userSearchSelect").select2({
+            //     placeholder: "Choose Salesforce logins",
+            //     tags: true
+            // });
+  
+            // s2.val(listOfUser).trigger("change"); 
+
+        //};
+    </script>
+
+    <div class="{!objinwiseLtngConstants.slds}">  
+        <apex:pageMessages id="msg"/>
+        <apex:form id="form1">
+            <apex:actionFunction name="passSelectedUser" action="{!doUpdate}" rerender="msg">      
+                <apex:param name="selectUserId" assignTo="{!selectUserIds}" value="" /> 
+            </apex:actionFunction> 
+            <apex:sectionHeader title="inwise Account Edit" subTitle="{!Account__c.Name}"  />
+      
+            <apex:pageBlock id="block1"  title="inwise Account Edit">
+                <apex:pageBlockButtons > 
+                    <apex:commandbutton value="Save" onclick="onSave();return false;" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                    <apex:commandbutton value="Cancel" action="{!Cancel}" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                    <apex:commandbutton value="Delete" action="{!delete}" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" onclick="return confirm('This Account will be deleted if you continue! Are you sure?');" />         
+                    <apex:actionStatus id="status2" startText="Please wait....">
+                        <apex:facet name="start"><img src="/img/loading.gif" /></apex:facet>
+                        <apex:facet name="stop"></apex:facet>
+                    </apex:actionStatus>
+                </apex:pageBlockButtons>
+
+                <apex:pageBlockSection id="sectionDefault" columns="2">
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Account__c.fields.Name.Label}" />
+                        <apex:inputField value="{!objInwiseSetup.Name}" styleClass="{!objinwiseLtngConstants.sldsInput}" />                          
+                    </apex:pageBlockSectionItem>       
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Account__c.fields.Token__c.Label}" />
+                        <apex:inputField value="{!objInwiseSetup.Token__c}" styleClass="{!objinwiseLtngConstants.sldsInput}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Account__c.fields.Default__c.Label}" />
+                        <apex:inputCheckbox value="{!objInwiseSetup.Default__c}" styleClass="{!objinwiseLtngConstants.sldsCheckbox}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Account__c.fields.Default_Campaign_Type__c.Label}" />
+                        <apex:inputField value="{!objInwiseSetup.Default_Campaign_Type__c}"  styleClass="{!objinwiseLtngConstants.sldsInput}" />             
+                    </apex:pageBlockSectionItem> 
+                </apex:pageBlockSection>
+
+                <apex:pageBlockSection id="sectionDefault1" columns="1" >
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Salesforce logins" /> 
+                        <!-- Multi-select Input -->
+                        <!-- <select id="userSearchSelect" multiple="multiple" style="width: 400px;">
+                        </select> -->
+
+                        <!-- Multi-select Input -->
+                        <apex:outputPanel >
+                            <select id="userSearchSelect" multiple="multiple" style="width: 400px;">
+                                <!-- Preload existing users as options -->
+                                <apex:repeat value="{!listOfSelectedUser}" var="user">
+                                    <option value="{!user.Id}" selected="selected">{!user.Name}</option>
+                                </apex:repeat>
+                            </select>
+                        </apex:outputPanel>
+
+                        <!-- <apex:outputPanel >
+                            <select class="js-example-basic-multiple" name="states[]"  multiple="multiple" id="multiSelectId" >
+                                <apex:repeat value="{!listOfUser}" var="user">
+                                    <option value="{!user.Id}" >{!user.Name}</option>
+                                </apex:repeat>
+                            </select>
+                        </apex:outputPanel> -->
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Account Id" />
+                        <apex:inputField value="{!objInwiseSetup.Id}"/>             
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+
+                <apex:pageBlockSection columns="2" title="SMS Configuration">      
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Account__c.fields.SMS_Sender__c.Label}" />
+                        <apex:inputField value="{!objInwiseSetup.SMS_Sender__c}"  styleClass="{!objinwiseLtngConstants.sldsInput}" />             
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Account__c.fields.Country__c.Label}" />
+                        <apex:inputField value="{!objInwiseSetup.Country__c}"  styleClass="{!objinwiseLtngConstants.sldsInput}" />             
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="{!$ObjectType.Account__c.fields.Trim_Leading_Zero__c.Label}" />
+                        <apex:inputField value="{!objInwiseSetup.Trim_Leading_Zero__c}"  styleClass="{!objinwiseLtngConstants.sldsInput}" />             
+                    </apex:pageBlockSectionItem> 
+                </apex:pageBlockSection>  
+            </apex:pageBlock>
+        </apex:form> 
+    </div>
+    <c:TagManager />
+</apex:page>

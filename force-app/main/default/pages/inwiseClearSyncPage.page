@@ -1,0 +1,30 @@
+<apex:page controller="inwiseGlobalAction" >
+    <apex:form >
+        <script>
+            function deleteSyncMasterRecs() {
+                if (confirm('Are you sure you want to delete Sync Master records ?')) {
+                    Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.inwiseGlobalAction.remoteClearSyncMaster}',
+                        function(result, event) {
+                            if (event.status) {
+                                alert(result); // Show success or error message
+                                window.history.back();
+                            } else {
+                                alert('An error occurred: ' + event.message);
+                                window.history.back();
+                            }
+                        },
+                        { escape: true } // Ensure output escaping
+                    );
+                } else {
+                    window.history.back();
+                }
+            }
+
+            // Trigger the delete action on page load
+            window.onload = function() {
+                deleteSyncMasterRecs();
+            };
+        </script>
+    </apex:form>
+</apex:page>

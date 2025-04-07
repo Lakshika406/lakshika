@@ -1,0 +1,45 @@
+<apex:page standardController="Campaign" extensions="SendToInwiseController" showHeader="false" sidebar="false">
+    <apex:includescript value="{!URLFOR($Resource.Jquery_Resources, 'Jquery_Resources/1.12.2.jquery.min.js')}"></apex:includescript> 
+    <apex:form >
+        <!-- Include CSRF token as a hidden input field -->
+        <input type="hidden" name="csrfToken" value="{!csrfToken}" />
+
+        <apex:actionStatus id="statusLoading">
+            <apex:facet name="start">
+                <span style="font-weight:bold; color: red;">
+                    Please wait....<img src="/img/loading.gif" /> 
+                </span>
+            </apex:facet>
+        </apex:actionStatus>
+        <apex:outputpanel id="pnlStatus"> 
+            <script>
+                function CloseMe(){
+                    alert("{!JSENCODE(ErrorMsg)}");
+                    var isNeedToRedirect = ('{!JSENCODE(IF(isNeedToRedirectOnSetup,"true", "false"))}' == "true");
+                    if(isNeedToRedirect){
+                        window.opener.location.href="{!JSENCODE(setupPageUrl)}";    
+                    }else{
+                        window.opener.location.href="/{!JSENCODE($CurrentPage.parameters.id)}"; 
+                    }                           
+                    window.close();
+                } 
+            </script>   
+            <span style="color:red;font-size:15px;font-weight:bold;">{!ErrorMsg}</span>  
+        </apex:outputpanel>
+
+        <!-- Action Function -->
+        <apex:actionfunction name="jsOnLoad" action="{!OnLoad}" status="statusLoading" rerender="pnlStatus" onComplete="CloseMe()">
+            <apex:param name="csrfToken" value="{!csrfToken}" assignTo="{!csrfToken}" />
+        </apex:actionfunction>
+
+        <script>
+            // Replace automatic loading with a controlled button trigger
+            
+            $(document).ready(function(){
+                jsOnLoad();
+            });        
+        </script>
+        <!-- <apex:commandButton value="Load Data" onclick="triggerOnLoad();" /> -->
+    </apex:form>
+    <c:TagManager />
+</apex:page>

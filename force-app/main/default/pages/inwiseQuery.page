@@ -1,0 +1,97 @@
+<apex:page showHeader="true" sidebar="true" controller="inwiseQueryController" tabStyle="Inwise_Setup__tab" docType="html-5.0" >
+<c:inwiseUtilHeader />
+<!--
+      <style type="text/css">
+              .slds a {
+                    color: black;
+               }
+               .slds a:focus{
+                  outline:none;
+               }
+        </style>
+     -->
+      <div class="{!objinwiseLtngConstants.slds}">  
+      <apex:form >
+	 <script>
+          	function redirectToURL(reportId){
+                 window.location.href = encodeURI('/' + reportId);
+            }
+                
+          </script>
+
+           <apex:sectionHeader title="Steps" subtitle="Sync SF to inwise"  id="sectionheader1"></apex:sectionHeader>
+              <apex:pageMessages id="msg"/>
+             <apex:pageBlock id="block1" title="Step 3 - {!objSync.Name}"> 
+                   <apex:pageBlockButtons location="bottom">
+                          <apex:commandButton value="GoTo Sync List" action="{!gotoHome}" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" ></apex:commandButton>
+                          <apex:commandButton value="Schedule" action="{!gotoSchedule}" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"></apex:commandButton>
+                   </apex:pageBlockButtons> 
+                  <apex:pageBlockSection columns="1" title="Lead - Total:{!totalLeads} {!IF(totalLeads>10,'Showing first:10 leads',' ')}" rendered="{!IF(listOfLeads.SIZE>0,true,false)}">        
+                     <apex:variable id="v1" value="{!1}"  var="count"></apex:variable> 
+                    <apex:pageBlockTable value="{!listOfLeads}" var="l" id="tblFilter" styleClass="{!objinwiseLtngConstants.sldsTableSldsTableBorderedSldsTableStriped}">
+                              <apex:column width="2%" style="vertical-align: top;" >
+                                      <apex:facet name="header"></apex:facet>
+                                       <apex:outputPanel > 
+                                            <apex:outputLabel value="{!count}"></apex:outputLabel>
+                                            <apex:variable value="{!count+1}"  var="count"/>
+                                        </apex:outputPanel>    
+                              </apex:column>
+                              <apex:column style="vertical-align: top;">
+                                      <apex:facet name="header">Name</apex:facet>
+                                      <apex:outputPanel rendered="{!IF(objinwiseLtngConstants.slds == NULL, true,false)}">
+                                              <a href="javascript:void(0)" target="_blank" onclick="redirectToURL('/{!JSENCODE(l.Id)}')" escape="true"><apex:outputText value="{!l.Name}" escape="true"/></a>
+                                      </apex:outputPanel>
+                                       <apex:outputPanel rendered="{!IF(objinwiseLtngConstants.slds != NULL, true,false)}">
+                                                <a href="{!'/one/one.app?#/sObject/'+ l.Id + '/view'}" target="_blank">{!l.Name }</a>
+                                       </apex:outputPanel>
+                                      
+                                      <!--<apex:outputLink value="/{!l.Id}" target="_blank">{!l.Name}</apex:outputLink> -->
+                              </apex:column>
+
+                    </apex:pageBlockTable>
+                 </apex:pageBlockSection> 
+                 <apex:pageBlockSection rendered="{!IF(listOfLeads.SIZE>0,false,true)}" title="Lead">
+                            <apex:outputLabel value="No Lead record(s) found with given filters" style="font-weight: bold;" />
+                 </apex:pageBlockSection>      
+
+                 <apex:pageBlockSection columns="1" title="Contacts - Total:{!totalContacts} {!IF(totalContacts>10,'Showing first:10 contacts',' ')}" rendered="{!IF(listOfContacts.SIZE>0,true,false)}">
+                     <apex:variable id="v1" value="{!1}"  var="count"></apex:variable> 
+                    <apex:pageBlockTable value="{!listOfContacts}" var="l" id="tblFilter" styleClass="{!objinwiseLtngConstants.sldsTableSldsTableBorderedSldsTableStriped}">
+                              <apex:column width="2%" style="vertical-align: top;" >
+                                      <apex:facet name="header"></apex:facet>
+                                       <apex:outputPanel > 
+                                            <apex:outputLabel value="{!count}"></apex:outputLabel>
+                                            <apex:variable value="{!count+1}"  var="count"/>
+                                        </apex:outputPanel>    
+                              </apex:column>
+                              <apex:column style="vertical-align: top;">
+                                      <apex:facet name="header">Name</apex:facet>
+                                      <apex:outputPanel rendered="{!IF(objinwiseLtngConstants.slds == NULL, true,false)}">
+                                              <a href="javascript:void(0)" target="_blank" onclick="redirectToURL('/{!JSENCODE(l.Id)}')" escape="true"><apex:outputText value="{!l.Name}" escape="true"/></a>
+                                      </apex:outputPanel>
+                                       <apex:outputPanel rendered="{!IF(objinwiseLtngConstants.slds != NULL, true,false)}">
+                                                <a href="{!'/one/one.app?#/sObject/'+ l.Id + '/view'}" target="_blank" escape="true"><apex:outputText value="{!l.Name}" escape="true"/></a>
+                                       </apex:outputPanel>
+                                      <!--<apex:outputLink value="/{!l.Id}" target="_blank">{!l.Name}</apex:outputLink> -->
+                              </apex:column>
+
+                    </apex:pageBlockTable>
+                 </apex:pageBlockSection> 
+                 <apex:pageBlockSection rendered="{!IF(listOfContacts.SIZE>0,false,true)}" title="Contact">
+                            <apex:outputLabel value="No Contact record(s) found with given filters" style="font-weight: bold;" />
+                 </apex:pageBlockSection>                                    
+                   <apex:outputPanel rendered="{!IF(objinwiseLtngConstants.slds == NULL, false,true)}">
+                        <style>
+                              .apexp .bPageBlock.apexDefaultPageBlock .pbBody .pbSubheader {
+                                    background-color: rgb(248, 248, 248);
+                                    border-top: 0 none;
+                                    color: black;
+                                }
+                        </style>
+               </apex:outputPanel>                        
+             </apex:pageBlock>
+     </apex:form>        
+  </div>
+      <c:TagManager />
+
+</apex:page>

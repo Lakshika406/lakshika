@@ -1,0 +1,242 @@
+<apex:page showHeader="true" sidebar="true" id="page1" tabStyle="Inwise_Setup__tab" standardController="Sync__c" extensions="ScheduleSyncReportController" docType="html-5.0" action="{!init}">
+<c:inwiseUtilHeader />
+<apex:outputPanel id="reRenderJsFile">
+<script>
+    function enterPress(e){
+        if(e.keyCode==13){
+            if(e.preventDefault){ 
+                e.preventDefault();
+            }
+            else{
+                e.returnValue=false;
+            }
+            validate();
+        }        
+    }
+    function doPrevStepJS(){
+        
+        var selectedRep = '{!JSENCODE(reportSelected)}';
+        var theRadioButtonSet = document.getElementsByClassName("radioBtn");
+        for (var x = 0; x < theRadioButtonSet.length; x++){
+            if (selectedRep == theRadioButtonSet[x].value) {
+                theRadioButtonSet[x].checked = true;
+            }
+        }    
+    }
+    var previousOnload = window.onload; window.onload = function() { 
+      //alert('loading...'); 
+      var selectedRep = '{!JSENCODE(reportSelected)}';
+        var theRadioButtonSet = document.getElementsByClassName("radioBtn");
+        for (var x = 0; x < theRadioButtonSet.length; x++){
+            if (selectedRep == theRadioButtonSet[x].value) {
+                theRadioButtonSet[x].checked = true;
+            }
+        }    
+    } 
+</script>
+</apex:outputPanel>
+    <div class="{!objinwiseLtngConstants.slds}">  
+        <apex:form >
+            <apex:actionFunction name="checkReports" action="{!checkReports}" immediate="true"  rerender="msg">
+                <apex:param value="" name="reportSelectedParam" assignto="{!reportSelected}" />
+            </apex:actionfunction>  
+            <apex:sectionHeader title="Steps" subtitle="Sync SF to inwise"  id="sectionheader1"></apex:sectionHeader>
+            <apex:pageMessages id="msg"/>
+              <!-- <apex:pageMessages id="showWarningMsg"></apex:pageMessages> -->
+                <apex:pageBlock id="block1" title="{!objWrapperSync.currentStep}"> 
+                    <apex:pageBlockButtons location="bottom">
+                        <apex:commandButton value="Previous Step"  action="{!doPrevStep}" rendered="{!objWrapperSync.Step2}" rerender="block1,msg,reRenderJsFile" status="statusloading" oncomplete="doPrevStepJS();" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                        <apex:commandButton value="{!IF(objWrapperSync.Step2,'Save','Next Step')}" action="{!nextStep}" rendered="{!objWrapperSync.isCanProceed}" reRender="block1,msg" status="statusloading" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" />
+                        <apex:commandButton value="Cancel" action="{!doCancel}" immediate="true" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" /> 
+                        <apex:actionStatus id="statusloading">
+                                <apex:facet name="start"><img src="/img/loading.gif" /></apex:facet>
+                        </apex:actionStatus>
+                    </apex:pageBlockButtons>
+
+                    <apex:pageBlockSection columns="1" rendered="{!AND(objWrapperSync.isCanProceed,objWrapperSync.Step1)}" >
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Sync Name"></apex:outputLabel>
+                            <apex:inputField value="{!objWrapperSync.objSync.Name}"  styleClass="{!objinwiseLtngConstants.sldsInput}" style="width: 29%"/> 
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Select Account" />
+                            <apex:outputPanel >
+                                <apex:selectList size="1"  value="{!objWrapperSync.selectedAccount}" styleClass="{!objinwiseLtngConstants.sldsInput}" style="width: 30%">
+                                    <apex:actionSupport event="onchange" reRender="pnlGroups,msg" action="{!init}" status="statusloading"></apex:actionSupport>
+                                    <apex:selectOptions value="{!listOfSelectOptionAccounts}" />
+                                </apex:selectList>
+                            </apex:outputPanel>   
+                       </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Select or create inwise group" />
+                            <apex:outputPanel id="pnlGroups">
+                                <apex:selectList size="1"  value="{!objWrapperSync.selectedGroup}" styleClass="{!objinwiseLtngConstants.sldsInput}" style="width: 30%">
+                                        <apex:selectOptions value="{!listOfSelectOptionGroups}" />
+                                </apex:selectList>&nbsp;&nbsp;Or&nbsp;&nbsp;
+                                <apex:inputText value="{!strGroupName}" styleClass="slds-input" style="width: auto;" html-placeholder="Enter new Group Name" />    
+                            </apex:outputPanel>   
+                       </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputLabel value="Choose a Salesforce Report" />
+                            <apex:outputPanel id="pnlViews">
+                                <!-- <apex:outputLabel value="{!selectedReportObjType}" rendered="{!IF($CurrentPage.parameters.sid != null, true, false)}" /> -->
+                                <apex:selectList size="1" value="{!selectedReportObjType}" disabled="{!disabledOnEdit}" styleClass="{!objinwiseLtngConstants.sldsInput}" style="width: 30%;vertical-align: top;" >
+                                        <apex:selectOptions value="{!listOfReport}" />
+                                        <apex:actionSupport action="{!doLoadReports}" reRender="pnlViews2,pnlReports,msg" status="statusloading" event="onchange" />
+                                </apex:selectList>
+                                <apex:outputPanel id="pnlViews2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <apex:inputText value="{!strReportName}" disabled="{!disabledOnEdit}" id="searchReport" styleClass="slds-input" style="width: auto;" html-placeholder="Enter a Report Name" />&nbsp;
+                                    <apex:commandButton value="Search" reRender="pnlReports,msg"   action="{!doSearchReports}" disabled="{!disabledOnEdit}"/>
+                                    <!-- <apex:actionFunction action="{!doLoadReports}" name="searchFunction" /> -->
+                              </apex:outputPanel>
+                            </apex:outputPanel>   
+                       </apex:pageBlockSectionItem>
+                    <!-- </apex:pageBlockSection> 
+                           
+                      
+                    <apex:pageBlockSection columns="1" > -->
+                        <apex:outputPanel id="pnlReports" rendered="{!IF(disabledOnEdit == false, true, false)}"> 
+                        <apex:pageBlockSectionItem rendered="{!If(listOfWrapperReport !=null && listOfWrapperReport.size>0,true,false)}">
+
+                                <apex:outputLabel value="Below matching reports found on the basis of your search.." rendered="{!showReportList}" style="color: #4a4a56;font-weight: bold;"/>
+                                <!-- <apex:pageblockSection rendered="{!If(listOfWrapperReport !=null && listOfWrapperReport.size>0,true,false)}"> -->
+                                    <apex:pageBlockTable value="{!listOfWrapperReport}" var="report"   id="reportTable">
+                                        <apex:column headerValue="Select Report">
+                                        <input type="radio" class="radioBtn" name="<strong>Select Report</strong>" id="theRadio" value="{!report.reportDeveloperName}" >
+                                        <br/>
+                                            <apex:actionSupport event="onclick" rerender="msg" action="{!checkReports}">
+                                                <apex:param name="reportDeveloperName" value="{!report.reportDeveloperName}"/>
+                                            </apex:actionSupport>
+                                        </input>
+                                        </apex:column>
+                                        <apex:column headerValue="Report" value="{!report.reportName}"/>
+                                    </apex:pageBlockTable>
+                                <!-- </apex:pageBlockSection> -->
+                            <!-- </apex:pageBlock> -->
+                       
+                    </apex:pageBlockSectionItem>
+                </apex:outputPanel>
+                <apex:outputPanel id="pnlReports2" rendered="{!IF(disabledOnEdit == true, true, false)}"> 
+                        <apex:pageBlockSectionItem rendered="{!If(listOfWrapperReport !=null && listOfWrapperReport.size>0,true,false)}">
+
+                                <apex:outputLabel value="Below matching reports found on the basis of your search.." rendered="{!showReportList}" style="color: #4a4a56;font-weight: bold;"/>
+                                <!-- <apex:pageblockSection rendered="{!If(listOfWrapperReport !=null && listOfWrapperReport.size>0,true,false)}"> -->
+                                    <apex:pageBlockTable value="{!listOfWrapperReport}" var="report"   id="reportTable">
+                                        <apex:column headerValue="Select Report">
+                                        <input type="radio" disabled="{!disabledOnEdit}" class="radioBtn" name="<strong>Select Report</strong>" id="theRadio" value="{!report.reportDeveloperName}" >
+                                        <br/>
+                                            <apex:actionSupport event="onclick" rerender="msg" action="{!checkReports}">
+                                                <apex:param name="reportDeveloperName" value="{!report.reportDeveloperName}"/>
+                                            </apex:actionSupport>
+                                        </input>
+                                        </apex:column>
+                                        <apex:column headerValue="Report" value="{!report.reportName}"/>
+                                    </apex:pageBlockTable>
+                                <!-- </apex:pageBlockSection> -->
+                            <!-- </apex:pageBlock> -->
+                       
+                    </apex:pageBlockSectionItem>
+                </apex:outputPanel>
+                </apex:pageBlockSection>     
+               
+                   
+                    <apex:pageBlockSection columns="1" rendered="{!AND(objWrapperSync.isCanProceed,objWrapperSync.Step1)}">
+                    <apex:outputPanel >
+                          <apex:inputCheckbox value="{!objWrapperSync.objSync.Dont_Delete_Existing_Contacts__c}" style="vertical-align: sub;"></apex:inputCheckbox>
+                          <apex:outputLabel value="{!MSG_SYNC_CHECKBOX}"></apex:outputLabel><br/><br/>
+                          <apex:outputLabel value="You can sync up to 50,000 in one sync of Salesforce view. If you need more than this, please use"></apex:outputLabel>  
+                          <apex:commandLink value="new sync" action="{!redirectToSyncWizard}" style="text-decoration: underline;"></apex:commandLink> 
+                          <apex:outputLabel value="instead or sync couple of views."></apex:outputLabel>
+                   </apex:outputPanel>
+                   </apex:pageBlockSection>   
+                   <!-- <apex:pageBlockSection columns="1" rendered="{!AND(objWrapperSync.isCanProceed,objWrapperSync.Step2)}" title="Lookup Field Mapping">
+                        <apex:pageblocktable value="{!listOfWrapperClassForReportLookup}" var="l" styleClass="{!objinwiseLtngConstants.sldsTableSldsTableBorderedSldsTableStriped}">
+                            <apex:column > 
+                                    <apex:facet name="header">
+                                            <div data-step="1" data-intro="{!$Label.StartTour_InwiseSync_1}" style="float: left;">Inwise Fields</div>
+                                    </apex:facet>
+                                    <apex:outputlabel value="{!l.inwiseField}" style="font-weight:bold;" />
+                               </apex:column>
+                               <apex:column>
+                                        <apex:facet name="header"><div data-step="2" data-intro="{!$Label.StartTour_InwiseSync_2}">Report Fields</div></apex:facet>
+                                        <apex:selectList size="1" value="{!l.ContactInfo.Salesforce_Field__c}" >
+                                                <apex:selectOptions value="{!listOfSelectOptionFields_Report}"/>
+                                        </apex:selectList>          
+                                </apex:column>
+                        </apex:pageblocktable>
+                    </apex:pageBlockSection>  -->
+
+                    
+
+                    <apex:pageBlockSection columns="1" rendered="{!AND(objWrapperSync.isCanProceed,objWrapperSync.Step2)}" title="Lookup Field Mapping">
+                        <apex:pageblocktable value="{!listOfWrapperClassForReportLookup}" var="l" styleClass="{!objinwiseLtngConstants.sldsTableSldsTableBorderedSldsTableStriped}">
+                            <apex:column > 
+                                    <apex:facet name="header">
+                                            <div data-step="1" data-intro="{!$Label.StartTour_InwiseSync_1}" style="float: left;">Inwise Fields</div>
+                                    </apex:facet>
+                                    <apex:outputlabel value="{!l.inwiseField}" style="font-weight:bold;" />
+                            </apex:column>
+                            
+                            <apex:column rendered="{!IF(selectedReportObjType == 'Contact', true,false)}" >
+                                <!-- <apex:outputlabel rendered="{!IF(selectedReportObjType == 'Contact', true,false)}" /> -->
+                                    <apex:facet name="header"><div data-step="2" data-intro="{!$Label.StartTour_InwiseSync_2}">Report Fields</div></apex:facet>
+                                    <apex:selectList size="1" value="{!l.ContactInfo.Salesforce_Field__c}" >
+                                            <apex:selectOptions value="{!listOfSelectOptionFields_Report}"/>
+                                    </apex:selectList>    
+                                <!-- </apex:outputlabel>       -->
+                            </apex:column>
+
+                            <apex:column rendered="{!IF(selectedReportObjType == 'Lead', true,false)}">
+                                    <apex:facet name="header"><div data-step="2" data-intro="{!$Label.StartTour_InwiseSync_2}">Report Fields</div></apex:facet>
+                                    <apex:selectList size="1" value="{!l.LeadInfo.Salesforce_Field__c}" >
+                                            <apex:selectOptions value="{!listOfSelectOptionFields_Report}"/>
+                                    </apex:selectList> 
+                            </apex:column>
+                                                  
+                        </apex:pageblocktable>
+                    </apex:pageBlockSection> 
+                    <apex:pageBlockSection columns="1" rendered="{!AND(objWrapperSync.isCanProceed,objWrapperSync.Step2,NOT(listOfWrapperClassForReportLookup.size>0))}">
+                            <apex:outputLabel value="No lookup field in report" style="font-weight: bold;" />
+                    </apex:pageBlockSection>    
+                   <apex:pageBlockSection columns="1" rendered="{!AND(objWrapperSync.isCanProceed,objWrapperSync.Step2)}" title="{!selectedReportObjType} - Total:{!iTotalCount} {!IF(iTotalCount>10,'Showing first:10 records',' ')}">
+
+                   </apex:pageBlockSection>
+                   <apex:pageBlockSection columns="1" rendered="{!AND(objWrapperSync.isCanProceed,objWrapperSync.Step2)}" >
+                         <apex:variable id="v1" value="{!1}"  var="count"></apex:variable> 
+                          <apex:pageBlockTable value="{!listOfWrapperResult}" var="l" id="tblFilter" styleClass="{!objinwiseLtngConstants.sldsTableSldsTableBorderedSldsTableStriped}" rendered="{!IF(listOfWrapperResult.SIZE>0,true,false)}">
+                                    <apex:column width="2%" style="vertical-align: top;" >
+                                            <apex:facet name="header"></apex:facet>
+                                             <apex:outputPanel > 
+                                                  <apex:outputLabel value="{!count}"></apex:outputLabel>
+                                                  <apex:variable value="{!count+1}"  var="count"/>
+                                              </apex:outputPanel>    
+                                    </apex:column>
+                                    <apex:column style="vertical-align: top;">
+                                            <apex:facet name="header">Name</apex:facet>
+                                            <apex:outputPanel rendered="{!IF(objinwiseLtngConstants.slds == NULL, true,false)}">
+                                                    <a href="javascript:void(0)" target="_blank" onclick="redirectToURL('/{!JSENCODE(l.recordid)}')">{!HTMLENCODE(l.recordname)}</a>
+                                            </apex:outputPanel>
+                                             <apex:outputPanel rendered="{!IF(objinwiseLtngConstants.slds != NULL, true,false)}">
+                                                      <a href="{!'/one/one.app?#/sObject/'+ l.recordid + '/view'}" target="_blank">{!l.recordname }</a>
+                                             </apex:outputPanel>
+                                    </apex:column>
+                          </apex:pageBlockTable>
+                          <apex:outputPanel rendered="{!IF(listOfWrapperResult.SIZE>0,false,true)}">
+                                <apex:outputLabel value="No Lead record(s) found with given Report" style="font-weight: bold;" />
+                          </apex:outputPanel>  
+                   </apex:pageBlockSection> 
+               <apex:outputPanel rendered="{!IF(objinwiseLtngConstants.slds == NULL, false,true)}">
+                        <style>
+                              .apexp .bPageBlock.apexDefaultPageBlock .pbBody .pbSubheader {
+                                    background-color: rgb(248, 248, 248);
+                                    border-top: 0 none;
+                                    color: black;
+                                }
+                        </style>
+               </apex:outputPanel> 
+             </apex:pageBlock> 
+      </apex:form>
+  </div>
+      <c:TagManager />
+
+</apex:page>

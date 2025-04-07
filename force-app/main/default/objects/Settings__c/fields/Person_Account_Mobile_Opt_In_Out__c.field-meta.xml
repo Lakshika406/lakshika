@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Person_Account_Mobile_Opt_In_Out__c</fullName>
+    <deprecated>false</deprecated>
+    <externalId>false</externalId>
+    <label>Person Account Mobile Opt-In/Out</label>
+    <length>200</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

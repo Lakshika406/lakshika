@@ -1,0 +1,8 @@
+<apex:component >
+        <apex:stylesheet value="{!URLFOR($Resource.SLDS, 'assets/styles/salesforce-lightning-design-system-vf.css')}" />
+       <apex:includeScript value="{!URLFOR($Resource.inwiseResource,'js/jquery.min.js')}" />
+       <apex:stylesheet value="{!URLFOR($Resource.inwiseResource,'css/introjs.css')}" /> 
+       <apex:includeScript value="{!URLFOR($Resource.inwiseResource,'js/util.js')}" />
+       <apex:stylesheet value="{!URLFOR($Resource.inwiseResource, 'css/util.css')}" />
+       <apex:stylesheet value="{!URLFOR($Resource.inwiseResource,'css/bootstrap-responsive.min.css')}" /> 
+</apex:component>

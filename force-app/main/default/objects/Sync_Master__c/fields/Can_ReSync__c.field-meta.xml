@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Can_ReSync__c</fullName>
+    <deprecated>false</deprecated>
+    <formula>IF(AND(Track_Members_When_Sync_Started__c, Total_Memerbs_Count_RollUp__c &gt; Processed_Members__c),true,false)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Can ReSync</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

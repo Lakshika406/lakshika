@@ -1,0 +1,143 @@
+<apex:page showHeader="false" sidebar="false" standardController="Lead" extensions="SendSMSLeadController"> 
+    <c:inwiseUtilHeader />
+    <style type="text/css">
+        .apexp .bPageBlock.apexDefaultPageBlock .pbBody .pbSubheader {
+            background-color: #95b0d6;
+            border-bottom: 0 solid;
+            color: #0d1828;
+        }
+    </style>
+
+    <apex:form >
+        <!-- Include CSRF token as a hidden input field -->
+        <input type="hidden" name="csrfToken" value="{!csrfToken}" />  
+        <script>
+            var objLeadJSON = ('{!JSENCODE(LeadJSON)}');
+            // var objLeadJSON = JSON.parse( '{!JSENCODE(LeadJSON)}');
+            var data = jQuery.parseJSON(objLeadJSON);
+
+            function doAddMergeField(){
+                $(".LeadMergeFieldsTxt").val("{Lead." + $(".LISTMergeFields").val() + "}");
+            }
+
+            function doAddTemplate(){
+                var template = $(".LISTTemplate").val();
+                addTextToMessageBody(template);
+            }
+
+            function doAddLandingPage(){
+                var landingpage = $(".LISTLandingPage").val();
+                addTextToMessageBody(landingpage);
+            }
+
+            function addTextToMessageBody(message){
+                if(message != ""){
+                    if($(".MSGTEXTAREA").val() != ""){
+                        message = '  ' + message;
+                    }else{
+                        message = message;
+                    }
+                    
+                    $(".MSGTEXTAREA").val($(".MSGTEXTAREA").val() + message);  
+                }
+            }
+
+            function doAddMergeFieldInMessage(){
+                var fieldapiname = $(".LISTMergeFields").val();
+                var fieldvalue = data[fieldapiname];
+                if(fieldvalue == undefined){
+                    alert("Selected field do not having any value!");
+                }else{
+                    var caretPos = $(".MSGTEXTAREA").get(0).selectionStart;
+                    if($(".MSGTEXTAREA").val() != ""){
+                        $(".MSGTEXTAREA").val($(".MSGTEXTAREA").val().substring(0, caretPos)  +' ' +  fieldvalue + $(".MSGTEXTAREA").val().substring(caretPos) );
+                    }else{
+                        $(".MSGTEXTAREA").val($(".MSGTEXTAREA").val().substring(0, caretPos)  +  fieldvalue + $(".MSGTEXTAREA").val().substring(caretPos) );
+                    }  
+                }
+            }
+
+            $(document).ready(function(){
+                createLogs();
+                // jsLoadLandingPages();
+            });
+        </script>
+
+        <!-- <apex:sectionHeader title="Send" subtitle="SMS" />     -->
+        <apex:pageMessages id="msg"/>
+        <apex:actionFunction name="createLogs" action="{!insertLogs}" immediate="true" rerender="none">
+            <apex:param name="csrfToken" value="{!csrfToken}" assignTo="{!csrfToken}" />
+        </apex:actionFunction>
+        <!-- <apex:actionFunction name="jsLoadLandingPages" action="{!getLandingPagesList}" immediate="true" rerender="block1,msg" status="smsStatus"></apex:actionFunction> -->
+        
+        <apex:pageBlock id="block1">
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Send" action="{!doSendSMS}"  reRender="msg,closePanel"  status="smsStatus" />
+                <apex:actionStatus id="smsStatus">
+                    <apex:facet name="start"><img  src="/img/loading.gif" /></apex:facet>
+                    <apex:facet name="stop"></apex:facet>
+                </apex:actionStatus> 
+            </apex:pageBlockButtons>
+            <apex:outputPanel id="closePanel">
+                <script>
+                    var smsSent =  ('{!JSENCODE(IF(isSMSSent,"true", "false"))}' == "true");;
+                    if(smsSent){
+                        setTimeout(closeWindow, 2000);
+                        function closeWindow() {
+                            window.opener.location.href="/{!JSENCODE($CurrentPage.parameters.id)}"; 
+                            window.close();
+                        }
+                    }
+                </script>
+            </apex:outputPanel>
+            <apex:pageBlockSection columns="2"  title="SMS Information (will be delivered to)">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="First Name" />
+                    <apex:outputLabel value="{!objLead.FirstName}" />
+                </apex:pageBlockSectionItem> 
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Last Name" />
+                    <apex:outputLabel value="{!objLead.LastName}" />
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Send To"  />
+                    <apex:selectList value="{!selectedNumber}" size="1" >
+                        <apex:selectOptions value="{!listOfSelectOptionPhoneNumbers}" />
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+
+            <apex:pageBlockSection columns="2" title="Message & Merge Lead Fields">       
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="SMS Body" />
+                    <apex:inputTextarea value="{!messageBody}" style="width:300px;" styleClass="MSGTEXTAREA" />
+                </apex:pageBlockSectionItem> 
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Merge Lead Fields" />
+                    <apex:outputPanel >
+                        <apex:selectList value="{!selectedLeadField}" size="1" styleClass="LISTMergeFields" onchange="doAddMergeField();">
+                            <apex:selectOptions value="{!listOfSelectOptionFields_Lead}" />
+                        </apex:selectList><br/>
+                        <apex:inputText styleClass="LeadMergeFieldsTxt" style="width:250px;"/>
+                        <input type="button" value="Add"  onclick="doAddMergeFieldInMessage();" class="btn" />
+                    </apex:outputPanel>                           
+                </apex:pageBlockSectionItem>
+
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Choose Template" />
+                    <apex:selectList value="{!selectedTemplate}" size="1" onchange="doAddTemplate();" styleClass="LISTTemplate">
+                        <apex:selectOptions value="{!listOfSelectOptionTemplates}" />
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>
+
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Landing Pages" />
+                    <apex:selectList value="{!selectedLandingPage}" size="1" onchange="doAddLandingPage();" styleClass="LISTLandingPage">
+                        <apex:selectOptions value="{!listOfSelectOptionLandingPages}" />
+                    </apex:selectList>
+                </apex:pageBlockSectionItem>    
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form> 
+    <c:TagManager />
+</apex:page>

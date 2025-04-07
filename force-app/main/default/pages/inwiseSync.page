@@ -1,0 +1,72 @@
+<apex:page standardController="Account__c" extensions="inwiseSyncController" sidebar="true" id="page1" tabStyle="inwise_Setup__tab" docType="html-5.0">
+        <c:inwiseUtilHeader />
+        <script>
+        $(document).ready(function(){
+            var overlayHelpValue =   "{!JSENCODE(IF(objInwiseUtil.objInwiseSetting.Overlay_Help__c, 'true', 'false'))}";
+                if(overlayHelpValue){
+                startTour(true);
+                }
+                jsInitializeWrapperClass(); 
+                // var autoSave = "{!JSENCODE($CurrentPage.parameters.doSave)}";
+                // if(autoSave){
+                //     $($(".pbBottomButtons").find('input')[0]).click();
+                // }        
+                });        
+                
+        </script>
+        <div class="{!objinwiseLtngConstants.slds}">  
+                <apex:form id="form1">
+                        <!-- Include CSRF token as a hidden input field -->
+                        <input type="hidden" name="csrfToken" value="{!csrfToken}" />  
+
+                        <apex:actionFunction name="jsInitializeWrapperClass" action="{!InitializeWrapperClass}" immediate="true"  rerender="block2,msg" status="loadingStatus">
+                                <apex:param name="csrfToken" value="{!csrfToken}" assignTo="{!csrfToken}" />
+                        </apex:actionFunction>
+                        <apex:actionFunction name="jsToggleshowhelp" action="{!toggleshowhelp}" immediate="true"  rerender="msg" oncomplete="hideTour();">
+                                <apex:param assignTo="{!isHelpOnload}" value="" id="isHelpOnload" name="isHelpOnload" />
+                        </apex:actionFunction> 
+                        <apex:sectionHeader title="Fields" subTitle="Mapping for  {!IF(objInwiseAccount.Id != NULL,objInwiseAccount.Name,'No Account Selected!')}" help="https://www.inwise.com" />
+                        <apex:pagemessages id="msg" />
+                        <apex:pageBlock id="block2">
+                                <apex:pageBlockButtons location="bottom"> 
+                                        <apex:commandbutton value="Save" action="{!doSave}" rendered="{!AND(listOfWrapperClass.size>0, IsNeedToBlock == false)}"  styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}" reRender="msg"/>
+                                        <apex:commandbutton value="Cancel" action="{!goToHome}"  styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"> </apex:commandbutton>
+                                        <apex:actionStatus id="loadingStatus">
+                                        <apex:facet name="start"><img  src="/img/loading.gif" /></apex:facet>
+                                        <apex:facet name="stop"></apex:facet>
+                                </apex:actionStatus> 
+
+                                </apex:pageBlockButtons>
+                                <apex:pageBlockSection columns="1" rendered="{!listOfWrapperClass.size>0}">
+                                        <apex:pageblocktable value="{!listOfWrapperClass}" var="l" styleClass="{!objinwiseLtngConstants.sldsTableSldsTableBorderedSldsTableStriped}">
+                                                <apex:column > 
+                                                        <apex:facet name="header">
+                                                                <div data-step="1" data-intro="{!$Label.StartTour_InwiseSync_1}" style="float: left;">Inwise Fields</div>
+                                                        </apex:facet>
+                                                        <apex:outputlabel value="{!l.inwiseField}" style="font-weight:bold;" />
+                                                </apex:column>
+                                                <apex:column >
+                                                        <apex:facet name="header"><div data-step="2" data-intro="{!$Label.StartTour_InwiseSync_2}">Contact Fields</div></apex:facet>
+                                                        <apex:selectList size="1" value="{!l.ContactInfo.Salesforce_Field__c}" >
+                                                                <apex:selectOptions value="{!listOfSelectOptionFields_Contact}"/>
+                                                        </apex:selectList>
+                                                                        <!--  <apex:outputLabel value="Automatically" rendered="{!l.inwiseField ==fieldSalesForceCampaignMemberID}" style="font-weight: bold;" /> -->
+                                                </apex:column>
+                                                <apex:column >
+                                                        <apex:facet name="header"><div data-step="3" data-intro="{!$Label.StartTour_InwiseSync_3}">Lead Fields</div></apex:facet>
+                                                        <apex:selectList size="1" value="{!l.LeadInfo.Salesforce_Field__c}" >
+                                                                <apex:selectOptions value="{!listOfSelectOptionFields_Lead}"/>
+                                                        </apex:selectList>
+                                                                        <!--  <apex:outputLabel value="Automatically" rendered="{!l.inwiseField ==fieldSalesForceCampaignMemberID}" style="font-weight: bold;" /> -->
+                                                </apex:column>
+                                        </apex:pageblocktable>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection columns="1" rendered="{!NOT(listOfWrapperClass.size>0)}">
+                                        <apex:outputLabel value="No record(s) found." style="font-weight: bold;" />
+                                </apex:pageBlockSection>    
+                        </apex:pageBlock>
+                </apex:form>        
+        </div>
+        <apex:includeScript value="{!URLFOR($Resource.inwiseResource,'js/intro.js')}" />
+        <c:TagManager />
+</apex:page>

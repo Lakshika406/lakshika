@@ -1,0 +1,182 @@
+<apex:page showHeader="true" sidebar="true" standardController="Account__c" extensions="inwiseSettingsController" id="page1" tabStyle="Inwise_Setup__tab" docType="html-5.0">
+    
+    <apex:slds />
+    <c:inwiseUtilHeader />
+
+    <style type="text/css">
+        .bPageBlock .detailList .data2Col{
+            width: auto !important;
+        }
+    </style>
+
+    <script type="text/javascript">
+        window.onload = function(){
+            doEnableDisableToggle("{!turnOnOffCampaignSyncBtnLabel}", "Turn On Campaign Sync", "CampaignCheckbox");
+            
+            doEnableDisableToggle("{!turnOnOffLandingSyncBtnLabel}", "Turn On Landing Sync", "LandingSyncCheckbox");
+            
+            doEnableDisableToggle("{!turnOnOffTrackActivityBtnLabel}", "Turn On Inwise Activity", "ActivityCheckbox");
+            
+            doEnableDisableToggle("{!turnOnOffTrackLogBtnLabel}", "Turn On Track Log", "TrackCheckbox");
+            
+            doEnableDisableToggle("{!turnOnOffErrorLogBtnLabel}", "Tracking is enabled for error", "errorLogCheckbox");
+        };
+
+        function doEnableDisableToggle(valueStr, valueStrToCompare, blockClassName){
+            var isTrue = false;
+            if(valueStr == valueStrToCompare){
+                isTrue = true;
+            }
+            document.getElementsByClassName(blockClassName)[0].checked = isTrue;
+        }
+
+        function jsRedirectToCustomSetting(recordId) {
+            //not using id not as it failed after each salesforce release.
+            //var url = "/one/one.app#/alohaRedirect/"+recordid+"?setupid=CustomSettings&isdtp=p1";
+            window.open('/lightning/setup/CustomSettings/home');
+        }
+    </script>
+
+    <div class="{!objinwiseLtngConstants.slds}">
+        <apex:form >
+            <apex:actionfunction name="turnOnOffCampaignSyncToggle" action="{!turnOnOffCampaignSync}" reRender="campaignSyncReRender"/>
+            <apex:actionfunction name="turnOnOffLandingSyncToggle" action="{!turnOnOffLandingSync}" reRender="landingSyncReRender"/>
+            <apex:actionfunction name="turnOnOffTrackActivitiesToggle" action="{!turnOnOffTrackActivities}" reRender="trackActivityReRender"/>
+            <apex:actionfunction name="turnOnOffTrackLogToggle" action="{!turnOnOffTrackLog}" reRender="trackApiReRender" />
+            <apex:actionfunction name="turnOnOffTrackErrorToggle" action="{!turnOnOffTrackError}" reRender="trackErrorReRender"/>
+            <apex:sectionHeader title="Settings" subTitle="inwise" help="https://www.inwise.com"></apex:sectionHeader>
+
+            <apex:pageMessages />
+            <apex:pageBlock title="Package Information">
+                <apex:pageBlockSection >
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Package Version" />
+                        <apex:outputLabel value="{!currentPackageVersion}" />
+                    </apex:pageBlockSectionItem> 
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+
+            <apex:pageBlock title="Sync Settings">
+                <apex:pageBlockSection columns="1">
+                    <apex:commandLink style="color: dodgerblue;" action="{!doInboundSMSConfiguration}" value="Inbound SMS configuration"/>
+                    <apex:commandLink style="color: dodgerblue;" action="/{!$Page.OptInOutConfiguration}?retURL=/{!$Page.inwiseHome}" value="Opt-in/out configuration"/>
+
+                    <div class="slds-form-element" style="display: -webkit-inline-box;">
+                        <span class="slds-form-element__label slds-m-bottom_none" >Campaign sync job</span>
+                        <label id="campaignSyncReRender" class="slds-checkbox_toggle slds-grid" >
+                            <input class="CampaignCheckbox" type="checkbox" onclick="turnOnOffCampaignSyncToggle();" name="checkbox-toggle-16" value="checkbox-toggle-16" aria-describedby="checkbox-toggle-16" />
+                            <span id="checkbox-toggle-16" class="slds-checkbox_faux_container" aria-live="assertive">
+                                <span class="slds-checkbox_faux" ></span>                         
+                            </span>
+                        </label>
+                    </div>
+                    <br/>
+                    <hr style="margin:4px"/>
+
+                    <div id="landingSyncReRender" class="slds-form-element" style="display: -webkit-inline-box;margin-bottom:2px;">
+                        <span class="slds-form-element__label slds-m-bottom_none">Landing sync job</span>
+                        <label class="slds-checkbox_toggle slds-grid" >
+                            <input class="LandingSyncCheckbox" type="checkbox" onclick="turnOnOffLandingSyncToggle();" name="checkbox-toggle-16" value="checkbox-toggle-16" aria-describedby="checkbox-toggle-16" />
+                            <span id="checkbox-toggle-16" class="slds-checkbox_faux_container" aria-live="assertive">
+                                <span class="slds-checkbox_faux"></span>
+                            </span>
+                        </label>
+                    </div>
+                    <br/>
+                    <hr style="margin:4px"/>
+
+                    <div id="trackActivityReRender" class="slds-form-element" style="display: -webkit-inline-box;">
+                        <span class="slds-form-element__label slds-m-bottom_none" >Track activity log</span>
+                        <label class="slds-checkbox_toggle slds-grid" >                        
+                            <input class="ActivityCheckbox" type="checkbox" onclick="turnOnOffTrackActivitiesToggle();" name="checkbox-toggle-16" value="checkbox-toggle-16" aria-describedby="checkbox-toggle-16" />
+                            <span id="checkbox-toggle-16" class="slds-checkbox_faux_container" aria-live="assertive">
+                                <span class="slds-checkbox_faux"></span>                           
+                            </span>
+                        </label>
+                    </div>
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+            <apex:pageBlock title="Logs and Custom Settings">
+                <apex:pageBlockSection columns="1" >
+                    <table width="60%">
+                        <apex:pageBlockSectionItem >
+                            <apex:outputPanel >
+                                <tr>
+                                    <td><apex:commandLink style="color: dodgerblue;" action="{!doReturnLogsUrl}" value="Logs of API requests to inwise"/></td>
+                                    <td><apex:commandButton action="{!doClearLogs}" value="Clear logs" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/></td>
+                                    <td><apex:commandButton action="{!doSendLogtoinwiseSupport}" value="Send log to inwise support" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/></td>
+                                    <td id="trackApiReRender">                                   
+                                        <div class="slds-form-element" style="display: -webkit-inline-box;">
+                                            <span class="slds-form-element__label slds-m-bottom_none">Track api log</span>
+                                            <label class="slds-checkbox_toggle slds-grid" >
+                                                <input class="TrackCheckbox" type="checkbox" name="checkbox-toggle-16" onclick="turnOnOffTrackLogToggle();" value="checkbox-toggle-16" aria-describedby="checkbox-toggle-16" />
+                                                <span id="checkbox-toggle-16" class="slds-checkbox_faux_container" aria-live="assertive">
+                                                    <span class="slds-checkbox_faux"></span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </apex:outputPanel>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputPanel >
+                                <tr>
+                                    <td><apex:commandLink style="color: dodgerblue;" action="{!doReturnErrorLogsUrl}" value="Error log"/></td>
+                                    <td><apex:commandButton action="{!doClearErrorLogs}" value="Clear error logs" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/></td>
+                                    <td><apex:commandButton action="{!doSendErrorLogtoinwiseSupport}" value="Send error log to inwise support" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/></td>
+                                    <td id="trackErrorReRender">                                   
+                                        <div class="slds-form-element" style="display: -webkit-inline-box;" >
+                                            <span class="slds-form-element__label slds-m-bottom_none" >Track errors</span>
+                                            <label class="slds-checkbox_toggle slds-grid" >
+                                                <input id="image" class="errorLogCheckbox" type="checkbox" onclick="turnOnOffTrackErrorToggle();" name="checkbox-toggle-16" value="checkbox-toggle-16" aria-describedby="checkbox-toggle-16"  />
+                                                <span id="checkbox-toggle-16" class="slds-checkbox_faux_container" aria-live="assertive">
+                                                    <span class="slds-checkbox_faux"></span>
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </apex:outputPanel>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputPanel >
+                                <tr>
+                                    <td><apex:commandLink style="color: dodgerblue;" action="{!doReturnIncomingWebhooksUrl}" value="Incoming webhooks"/></td>
+                                    <td><apex:commandButton action="{!doClearIncomingWebhooks}" value="Clear incoming webhooks" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/></td>
+                                </tr>
+                            </apex:outputPanel>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputPanel >
+                                <tr>
+                                    <td>
+                                        <apex:commandLink style="color: dodgerblue;" onclick="jsRedirectToCustomSetting('{!JSENCODE(objInwiseUtil.objInwiseSetting.Id)}');" value="Advanced settings" rendered="{!objinwiseLtngConstants.isLightning}"/>
+                                        <apex:commandLink style="color: dodgerblue;" action="{!doReturnCustomSettingUrl}" value="Custom settings" rendered="{!NOT(objinwiseLtngConstants.isLightning)}"/>
+                                    </td>
+                                    <td><apex:commandButton disabled="{!isAdvancedFeaturesBtnDisabled}" action="{!doCheckAndCreateRemoteSite}" value="Activate advanced features" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/></td>
+                                </tr>
+                            </apex:outputPanel>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputPanel >
+                                <tr>
+                                    <td><apex:commandLink style="color: dodgerblue;" action="{!doReturnSyncMasterUrl}" value="Logs of sync process"/></td>
+                                </tr>
+                            </apex:outputPanel>
+                        </apex:pageBlockSectionItem>
+                        <apex:pageBlockSectionItem >
+                            <apex:outputPanel >
+                                <tr>
+                                    <td><apex:commandLink style="color: dodgerblue;" action="{!doReturnLandingSyncHistoryUrl}" value="Logs of landing sync"/></td>  
+                                    <td><apex:commandButton action="{!doClearLandingSync}" value="Clear landing sync" styleClass="{!objinwiseLtngConstants.sldsButtonSldsButtonNeutral}"/></td>
+                                </tr>
+                            </apex:outputPanel> 
+                        </apex:pageBlockSectionItem>
+                    </table>
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+        </apex:form>
+    </div>
+    <c:TagManager />
+</apex:page>

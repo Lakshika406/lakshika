@@ -1,0 +1,117 @@
+<!--******************************************************************************************
+*Created By:  Kapil Goutam
+*Created On:  08-Oct-2019
+*Purpose :    page to show inbound sms configuration
+* * -----------------------------------------------------
+* Modified On       Modified By     Purpose
+
+******************************************************************************************-->
+<apex:page id="InboundSMSConfiguration" controller="InboundSMSConfigurationController" showHeader="true" sidebar="true" tabStyle="Inwise_Setup__tab"  docType="html-5.0">
+    <div class="{!objinwiseLtngConstants.slds}">
+        <style>
+            .fieldshadding{
+                padding-top: 7px;
+                font-size: 12px;
+                font-style: italic;
+                font-weight: bold;
+            }
+            .selectList{
+                width: 250px;
+            }
+        </style>
+        <apex:form >
+            <apex:actionFunction name="jsCheckOnChange" action="{!doCheckOnChange}"  rerender="pnlFields,msg,savetoFields,savetoFields1" status="status4" oncomplete="getAuthToken();">
+           <!--     <apex:param name="sSelectedCheckbox" assignTo="{!sSelectedCheckbox}" id="sSelectedCheckbox" value=""  />-->
+            </apex:actionFunction>
+            <apex:sectionHeader title="Configuration" subtitle="Webhook"  id="sectionheader1" ></apex:sectionHeader>
+            <apex:pageMessages id="msg"/>
+            <apex:pageBlock id="block1">
+                <apex:pageBlockButtons location="bottom">
+                    <apex:commandButton value="Save" action="{!doSave}" rendered="{!NOT(isSaved)}"/>
+                    <apex:commandButton value="Cancel" action="{!doCancel}" />
+                    <apex:actionStatus id="status4" startText="Please wait....">
+                        <apex:facet name="start"><img  src="/img/loading.gif" /></apex:facet>
+                        <apex:facet name="stop"></apex:facet>
+                    </apex:actionStatus>
+                </apex:pageBlockButtons>
+                <apex:pageBlockSection title="Inbound SMS Configuration" columns="1">
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Webhook endpoint" />
+                        <apex:outputLink value="{!hostUrl}" >{!hostUrl}</apex:outputLink>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Save To Activity History" />
+                        <apex:outputPanel id="savetoFields">
+                         <apex:inputCheckbox value="{!isActivityHistorySelected}" onChange="jsCheckOnChange();"></apex:inputCheckbox>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Save To Messaging History" />
+                        <apex:outputPanel id="savetoFields1">
+                         <apex:inputCheckbox value="{!isMessageHistorySelected}" onChange="jsCheckOnChange();"></apex:inputCheckbox>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Select Field/Object" />
+                        <apex:outputPanel id="pnlFields">
+                            <table style="border: 0px;" cellpadding="5" cellspacing="5">
+                                <tr>
+                                    <td class="fieldshadding">
+                                        <apex:outputLabel value="Contact" />
+                                    </td>
+                                   
+                                    <td>
+                                        <apex:inputCheckbox value="{!isContactSelected}" onChange="jsCheckOnChange();"></apex:inputCheckbox>
+                                    </td>
+                                    <td>
+                                        <apex:selectList size="1" disabled="{!NOT(isContactSelected)}" styleClass="selectList" value="{!sSelectedContactField}">
+                                            <apex:selectOptions value="{!listOfSelectOptionFields_Contact}"/>
+                                        </apex:selectList>
+                                    </td>
+                                </tr>
+                               <tr>
+                                    <td class="fieldshadding">
+                                        <apex:outputLabel value="Account" />
+                                    </td>
+                                    <td>
+                                        <apex:inputCheckbox value="{!isAccountSelected}" onChange="jsCheckOnChange();"></apex:inputCheckbox>
+                                    </td>
+                                    <td>
+                                        <apex:selectList size="1" disabled="{!NOT(isAccountSelected)}" styleClass="selectList" value="{!sSelectedAccountField}">
+                                            <apex:selectOptions value="{!listOfSelectOptionFields_Account}"/>
+                                        </apex:selectList>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fieldshadding">
+                                        <apex:outputLabel value="Lead" />
+                                    </td>
+                                    <td>
+                                        <apex:inputCheckbox value="{!isLeadSelected}" onChange="jsCheckOnChange();"></apex:inputCheckbox>
+                                    </td>
+                                    <td>
+                                        <apex:selectList size="1" disabled="{!NOT(isLeadSelected)}" styleClass="selectList" value="{!sSelectedLeadField}">
+                                            <apex:selectOptions value="{!listOfSelectOptionFields_Lead}"/>
+                                        </apex:selectList>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel value="Activity Action"></apex:outputLabel>
+                        <apex:outputPanel >
+                            <apex:outputLabel value="If more than one appropriate records is found"></apex:outputLabel>
+                            <apex:selectRadio value="{!addActivityToAll}" layout="pageDirection">
+                                <apex:selectOption itemLabel="add activity to all appropriate records" itemValue="true"/>
+                                <apex:selectOption itemLabel="add activity to records that already have outbound sms in their activity history" itemValue="false" />
+                            </apex:selectRadio>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+        </apex:form>
+    </div>
+</apex:page>
